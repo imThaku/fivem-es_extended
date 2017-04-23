@@ -1,0 +1,243 @@
+<head>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold" title="roboto">
+	<script src="nui://game/ui/jquery.js" type="text/javascript"></script>
+
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+
+	<style>
+
+		@font-face {
+			font-family: pcdown;
+			src: url('pdown.ttf');
+		}
+
+		@font-face {
+			font-family: bankgothic;
+			src: url('bankgothic.ttf');
+		}
+
+		.tiny {
+			font-size: 29px;
+			position: absolute; right: 10;
+		}
+
+		#container {
+			position: absolute;
+			top: 80; right: 40;
+		}
+
+		#money, #job {
+			font-family: pcdown;
+			font-size: 35px;
+			color: white;
+			padding: 4px;
+			text-shadow:
+		   	-1px -1px 0 #000,
+				 1px -1px 0 #000,
+				-1px  1px 0 #000,
+				 1px  1px 0 #000;
+
+			text-align: right;
+		}
+
+		#inventory {
+				font-family     : bankgothic;  
+		    width           : 350px;
+		    background-color: #506be6;
+		    color           : #fff;
+		    box-shadow      : 0px 0px 50px 0px #000;
+		    position        : absolute;
+		    right           : 40;
+		    bottom          : 40;
+		    display         : none;
+		}
+
+		#inventory .head {
+			text-align  : center;
+	    height      : 40px;
+	    line-height : 40px;
+		}
+
+		#inventory .line {
+			text-align: center;
+		}
+
+		#inventory .line {
+		    height          : 40px;
+		    display         : block;
+		    background-color: #f1f1f1;
+		    box-shadow      : inset 1px 0px 0px 1px #b8b8b8;
+		    height          : 32px;
+		    line-height     : 32px;
+		    color           : #3A3A3A;
+		}
+
+		#inventory_notif {
+			font-family: bankgothic; 
+			position   : absolute; 
+	    right      : 40;
+	    bottom     : 40;
+	    font-size  : 2em;
+	    font-weight: bold;
+	    color      : #FFF;
+			text-shadow:
+		   	-1px -1px 0 #000,
+				 1px -1px 0 #000,
+				-1px  1px 0 #000,
+				 1px  1px 0 #000;
+		}
+
+	</style>
+</head>
+
+<body>
+
+	<div id="inventory_notif"></div>
+
+	<div id="inventory">
+		<div class="items"></div>
+	</div>
+
+	<div id="container">
+		<div id="money"></div>
+		<div id="job"></div>
+	</div>
+
+	<script>
+
+		function addCommas(nStr) {
+			nStr += '';
+			var x = nStr.split('.');
+			var x1 = x[0];
+			var x2 = x.length > 1 ? '.' + x[1] : '';
+			var rgx = /(\d+)(\d{3})/;
+			while (rgx.test(x1)) {
+				x1 = x1.replace(rgx, '$1' + '<span style="margin-left: 3px; margin-right: 3px;"/>' + '$2');
+			}
+			return x1 + x2;
+		}
+
+		let accountDivs = {}
+
+		let onData = function(data){
+
+				if(data.setmoney == true){
+
+					for(let i=0; i<data.accounts.length; i++){
+						
+						let account = data.accounts[i];
+
+						if(typeof accountDivs[account.name] == 'undefined'){
+							let div = $('<div class="cash"/>');
+							$('#money').append(div);
+							accountDivs[account.name] = div;
+						}
+
+						accountDivs[account.name].html('<div><img src="img/accounts/' + account.name + '.png"/>&nbsp;' + addCommas(account.money) + '</div>');
+					}
+				}
+/*				
+				if(data.addcash == true){
+					$(".tiny").remove();
+
+					var element = $('<div class="tiny">+<font style="color: rgb(0, 125, 0); font-weight: 700; margin-right: 6px;""><img src="img/accounts/' + data.account.name + '.png"/></font>'+addCommas(data.money) + '</div>')
+					$("#money").append(element)
+
+					setTimeout(function(){
+						$(element).fadeOut(600, function() { $(this).remove(); })
+					}, 1000)
+				}
+
+				if(data.removecash == true){
+					$(".tiny").remove();
+					
+					var element = $('<div class="tiny">-<font style="color: rgb(250, 0, 0); font-weight: 700; margin-right: 6px;""><img src="img/accounts/' + data.account.name + '.png"/></font>'+addCommas(data.money)+'</div>')
+					$("#money").append(element)
+
+					setTimeout(function(){
+						$(element).fadeOut(600, function() { $(this).remove(); })
+					}, 1000)
+				}
+*/
+				if(data.setDisplay == true){
+					$("#money").css('opacity', data.display)
+				}
+
+				if(data.removeInventoryItem){
+
+					$('#inventory').html('<div class="head">Inventaire</div>');
+
+					for(let i=0; i<data.inventory.length; i++)
+						if(data.inventory[i].count > 0)
+							$('#inventory').append('<div class="line">' + data.inventory[i].label + ' x' + data.inventory[i].count + '</div>')
+
+					$('#inventory_notif').text('- ' + data.count + 'x ' + data.item.label)
+
+					setTimeout(function(){
+						$('#inventory_notif').fadeOut(600, function() { $(this).text('').show(); })
+					}, 1000)
+
+				}
+
+				if(data.addInventoryItem){
+
+					$('#inventory').html('<div class="head">Inventaire</div>');
+
+					for(let i=0; i<data.inventory.length; i++)
+						if(data.inventory[i].count > 0)
+							$('#inventory').append('<div class="line">' + data.inventory[i].label + ' x' + data.inventory[i].count + '</div>')
+
+					$('#inventory_notif').text('+ ' + data.count + 'x ' + data.item.label)
+
+					setTimeout(function(){
+						$('#inventory_notif').fadeOut(600, function() { $(this).text('').show(); })
+					}, 1000)
+
+				}
+
+				if(data.setInventoryDisplay === true){
+
+					$('#inventory').html('<div class="head">Inventaire</div>');
+
+					for(let i=0; i<data.inventory.length; i++)
+						if(data.inventory[i].count > 0)
+							$('#inventory').append('<div class="line">' + data.inventory[i].label + ' x' + data.inventory[i].count + '</div>')
+
+					$("#inventory").show()
+					$(cursor).show();
+				}
+
+				if(data.setInventoryDisplay === false){
+					$("#inventory").hide()
+					$(cursor).hide();
+				}
+
+				if(data.setJob === true){
+					$('#job').html(data.job.label + ' - ' + data.job.grade_label)
+				}
+
+				if(data.setJob === false){
+					$('#job').html('')
+				}
+
+				if (data.click) {
+           // Avoid clicking the cursor itself, click 1px to the top/left;
+           Click(cursorX - 1, cursorY - 1);
+        }
+
+		}
+
+		window.onload = function(e){
+			// NUI Callback
+			window.addEventListener('message', function(event){ onData(event.data); })
+		}
+
+    document.onkeyup = function (data) {
+      if (data.which == 27) {
+        $.post('http://es_extended/escape', '{}');
+      }
+    };
+
+	</script>
+
+</body>
