@@ -206,10 +206,9 @@ function ExtendedPlayer:setJob(name, grade)
 
 end
 
-function ExtendedPlayer:removeJob(name)
+function ExtendedPlayer:removeJob()
 	
-	local executed_query  = MySQL:executeQuery("SELECT * FROM jobs WHERE name = '@name'", {['@name'] = name})
-	local result          = MySQL:getResults(executed_query, {'id', 'name', 'label'})
+	local executed_query  = MySQL:executeQuery("UPDATE users SET job = '-1', job_grade = '-1' WHERE identifier = '@identifier'", {['@identifier'] = self.identifier})
 
 	self.job['id'  ] = -1
 	self.job['name'] = -1
