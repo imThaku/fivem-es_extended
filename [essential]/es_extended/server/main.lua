@@ -310,7 +310,7 @@ local function paycheck()
 			for i=1, #players, 1 do
 				if players[i].job.id ~= -1 then
 					players[i]:addMoney(players[i].job.grade_salary)
-					TriggerClientEvent('esx_weedjob:showNotification', players[i].player.source, 'Vous avez recu votre salaire : ' .. '$' .. players[i].job.grade_salary)
+					TriggerClientEvent('esx:showNotification', players[i].player.source, 'Vous avez recu votre salaire : ' .. '$' .. players[i].job.grade_salary)
 				end
 			end
 
