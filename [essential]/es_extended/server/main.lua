@@ -101,63 +101,62 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 		end
 
 	end)
+end)
 
-	RegisterServerEvent('esx:getPlayerFromId')
-	AddEventHandler('esx:getPlayerFromId', function(source, cb)
-		cb(Users[source])
-	end)
+RegisterServerEvent('esx:getPlayerFromId')
+AddEventHandler('esx:getPlayerFromId', function(source, cb)
+	cb(Users[source])
+end)
 
-	RegisterServerEvent('esx:getPlayers')
-	AddEventHandler('esx:getPlayers', function(cb)
-		cb(Users)
-	end)
+RegisterServerEvent('esx:getPlayers')
+AddEventHandler('esx:getPlayers', function(cb)
+	cb(Users)
+end)
 
-	AddEventHandler('playerDropped', function()
+AddEventHandler('playerDropped', function()
+	
+	if Users[source] ~= nil then
 		
-		if Users[source] ~= nil then
-			
-			-- User accounts
-			local query = ''
+		-- User accounts
+		local query = ''
 
-			for i=1, #Users[source].accounts, 1 do
-				query = query .. "UPDATE user_accounts SET `money`='" .. Users[source].accounts[i].money .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND name = '" .. Users[source].accounts[i].name .. "';"
+		for i=1, #Users[source].accounts, 1 do
+			query = query .. "UPDATE user_accounts SET `money`='" .. Users[source].accounts[i].money .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND name = '" .. Users[source].accounts[i].name .. "';"
+		end
+
+		MySQL:executeQuery(query)
+
+		-- Inventory items
+		local dbInventory = {}
+
+		local executed_query  = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = Users[source].identifier})
+		local result          = MySQL:getResults(executed_query, {'identifier', 'item', 'count'}, "id")
+
+		for i=1, #result, 1 do
+			dbInventory[result[i].item] = result[i].count
+		end
+
+		local query     = ''
+		local itemCount = 0
+
+		for i=1, #Users[source].inventory, 1 do
+			if dbInventory[Users[source].inventory[i].item] == nil then
+				query = query .. "INSERT INTO user_inventory (identifier, item, count) VALUES ('" .. Users[source].identifier .. "', '" .. Users[source].inventory[i].item .. "', '" .. Users[source].inventory[i].count .. "');"
+			else
+				query = query .. "UPDATE user_inventory SET `count`='" .. Users[source].inventory[i].count .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND item = '" .. Users[source].inventory[i].item .. "';"
 			end
 
-			MySQL:executeQuery(query)
-
-			-- Inventory items
-			local dbInventory = {}
-
-			local executed_query  = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = Users[source].identifier})
-			local result          = MySQL:getResults(executed_query, {'identifier', 'item', 'count'}, "id")
-
-			for i=1, #result, 1 do
-				dbInventory[result[i].item] = result[i].count
-			end
-
-			local query     = ''
-			local itemCount = 0
-
-			for i=1, #Users[source].inventory, 1 do
-				if dbInventory[Users[source].inventory[i].item] == nil then
-					query = query .. "INSERT INTO user_inventory (identifier, item, count) VALUES ('" .. Users[source].identifier .. "', '" .. Users[source].inventory[i].item .. "', '" .. Users[source].inventory[i].count .. "');"
-				else
-					query = query .. "UPDATE user_inventory SET `count`='" .. Users[source].inventory[i].count .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND item = '" .. Users[source].inventory[i].item .. "';"
-				end
-
-				itemCount = itemCount + 1
-
-			end
-
-			if itemCount > 0 then
-				MySQL:executeQuery(query)
-			end
-
-			Users[source] = nil
+			itemCount = itemCount + 1
 
 		end
 
-	end)
+		if itemCount > 0 then
+			MySQL:executeQuery(query)
+		end
+
+		Users[source] = nil
+
+	end
 
 end)
 
