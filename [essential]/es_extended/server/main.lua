@@ -24,16 +24,23 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 			}
 		end
 
-		local items = {}
+		local inventory = {}
+		local items     = {}
 
 		local executed_query  = MySQL:executeQuery("SELECT * FROM items")
 		local result          = MySQL:getResults(executed_query, {'name', 'label'})
 
 		for i=1, #result, 1 do
-			items[result[i].name] = result[i].label
+			inventory[i] = {
+				item  = result[i].name,
+				count = 0,
+				label = result[i].label
+			}
 		end
 
-		local inventory = {}
+		for i=1, #result, 1 do
+			items[result[i].name] = result[i].label
+		end
 
 		local executed_query  = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = user.identifier})
 		local result          = MySQL:getResults(executed_query, {'item', 'count'}, "id")
