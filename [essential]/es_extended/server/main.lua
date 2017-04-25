@@ -125,26 +125,30 @@ AddEventHandler('playerDropped', function()
 	if Users[source] ~= nil then
 		
 		-- User accounts
-		local query = ''
+		local query     = ''
+		local itemCount = 0
 
 		for i=1, #Users[source].accounts, 1 do
 			query = query .. "UPDATE user_accounts SET `money`='" .. Users[source].accounts[i].money .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND name = '" .. Users[source].accounts[i].name .. "';"
+			itemCount = itemCount + 1
 		end
 
-		MySQL:executeQuery(query)
+		if itemCount > 0 then
+			MySQL:executeQuery(query)
+		end
 
 		-- Inventory items
 		local dbInventory = {}
 
 		local executed_query  = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = Users[source].identifier})
 		local result          = MySQL:getResults(executed_query, {'identifier', 'item', 'count'}, "id")
-
+		local itemCount = 0
 		for i=1, #result, 1 do
 			dbInventory[result[i].item] = result[i].count
 		end
 
-		local query     = ''
-		local itemCount = 0
+		local query = ''
+		itemCount   = 0
 
 		for i=1, #Users[source].inventory, 1 do
 			if dbInventory[Users[source].inventory[i].item] == nil then
@@ -154,7 +158,6 @@ AddEventHandler('playerDropped', function()
 			end
 
 			itemCount = itemCount + 1
-
 		end
 
 		if itemCount > 0 then
@@ -267,13 +270,17 @@ local function saveData()
 		for k,v in pairs(Users)do
 			
 			-- User accounts
-			local query = ''
+			local query     = ''
+			local itemCount = 0
 
 			for i=1, #v.accounts, 1 do
 				query = query .. "UPDATE user_accounts SET `money`='" .. v.accounts[i].money .. "' WHERE identifier = '" .. v.identifier .. "' AND name = '" .. v.accounts[i].name .. "';"
+				itemCount = itemCount + 1
 			end
 
-			MySQL:executeQuery(query)
+			if itemCount > 0 then
+				MySQL:executeQuery(query)
+			end
 
 			-- Inventory items
 			local dbInventory = {}
@@ -285,7 +292,8 @@ local function saveData()
 				dbInventory[result[i].item] = result[i].count
 			end
 
-			local query = ''
+			local query     = ''
+			local itemCount = 0
 
 			for i=1, #v.inventory, 1 do
 				if dbInventory[v.inventory[i].item] == nil then
@@ -293,9 +301,13 @@ local function saveData()
 				else
 					query = query .. "UPDATE user_inventory SET `count`='" .. v.inventory[i].count .. "' WHERE identifier = '" .. v.identifier .. "' AND item = '" .. v.inventory[i].item .. "';"
 				end
+
+				itemCount = itemCount + 1
 			end
 
-			MySQL:executeQuery(query)
+			if itemCount > 0 then
+				MySQL:executeQuery(query)
+			end
 
 			-- Job
 			MySQL:executeQuery(

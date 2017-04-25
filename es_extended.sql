@@ -2,7 +2,7 @@ USE `gta5_gamemode_essential`;
 
 ALTER TABLE `users` 
 ADD COLUMN `skin` LONGTEXT NULL AFTER `money`,
-ADD COLUMN `job` INT NULL DEFAULT 0 AFTER `skin`,
+ADD COLUMN `job` INT NULL DEFAULT 1 AFTER `skin`,
 ADD COLUMN `job_grade` INT NULL DEFAULT 0 AFTER `job`;
 
 CREATE TABLE `items` (
