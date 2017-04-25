@@ -162,7 +162,10 @@ end)
 
 RegisterServerEvent('esx:requestPlayerDataForGUI')
 AddEventHandler('esx:requestPlayerDataForGUI', function()
-	TriggerEvent('esx:getPlayerFromId', source, function(xPlayer)
+
+	local _source = source
+
+	TriggerEvent('esx:getPlayerFromId', _source, function(xPlayer)
 
 		local data = {
 			money     = xPlayer.player.money,
@@ -170,7 +173,7 @@ AddEventHandler('esx:requestPlayerDataForGUI', function()
 			inventory = xPlayer.inventory
 		}
 
-		TriggerClientEvent('esx:responsePlayerDataForGUI', source, data)
+		TriggerClientEvent('esx:responsePlayerDataForGUI', _source, data)
 
 	end)
 end)
@@ -249,6 +252,7 @@ TriggerEvent('es:addCommand', 'sendmoney', function(source, args, user)
 	end
 
 end)
+
 
 local function saveData()
 	

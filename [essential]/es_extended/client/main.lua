@@ -152,3 +152,21 @@ Citizen.CreateThread(function()
 
   end
 end)
+
+-- Dot above head
+if Config.ShowDotAbovePlayer then
+	Citizen.CreateThread(function()
+		while true do
+
+			Wait(0)
+
+			for id = 1, 32 do
+				if NetworkIsPlayerActive(id) and GetPlayerPed(id) ~= GetPlayerPed(-1) then
+					ped  = GetPlayerPed(id)
+					headId = Citizen.InvokeNative(0xBFEFE3321A3F5015, ped, ('·'), false, false, '', false)
+				end
+			end
+
+		end
+	end)
+end
