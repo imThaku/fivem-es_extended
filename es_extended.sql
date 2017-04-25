@@ -24,12 +24,16 @@ CREATE TABLE `job_grades` (
   PRIMARY KEY (`id`)
 );
 
+INSERT INTO `job_grades` VALUES (1,0,0,'rsa','RSA',200,'{}','{}');
+
 CREATE TABLE `jobs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `label` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+
+INSERT INTO `jobs` VALUES (1,'unemployed','Chômeur');
 
 CREATE TABLE `user_accounts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
