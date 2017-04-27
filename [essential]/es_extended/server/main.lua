@@ -193,10 +193,10 @@ AddEventHandler('playerDropped', function()
 			MySQL:executeQuery(query)
 		end
 
-		-- Job and loadout
+		-- Job, loadout and position
 		MySQL:executeQuery(
-			"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout' WHERE identifier = '@identifier'",
-			{['@identifier'] = Users[source].identifier, ['@job'] = Users[source].job.id, ['@grade'] = Users[source].job.grade, ['@loadout'] = json.encode(Users[source].loadout)}
+			"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout', position='@position' WHERE identifier = '@identifier'",
+			{['@identifier'] = Users[source].identifier, ['@job'] = Users[source].job.id, ['@grade'] = Users[source].job.grade, ['@loadout'] = json.encode(Users[source].loadout), ['@position'] = json.encode(Users[source].player.coords)}
 		)
 
 		Users[source] = nil
@@ -219,6 +219,27 @@ AddEventHandler('esx:requestPlayerDataForGUI', function()
 		}
 
 		TriggerClientEvent('esx:responsePlayerDataForGUI', _source, data)
+
+	end)
+end)
+
+RegisterServerEvent('esx:requestLastPosition')
+AddEventHandler('esx:requestLastPosition', function()
+	
+	local _source = source
+
+	TriggerEvent('esx:getPlayerFromId', source, function(xPlayer)
+		
+		local executed_query  = MySQL:executeQuery("SELECT * FROM users WHERE identifier = '@identifier'", {['@identifier'] = xPlayer.identifier})
+		local result          = MySQL:getResults(executed_query, {'position'})
+
+		local position = nil
+
+		if result[1].position ~= nil then
+			position = json.decode(result[1].position)
+		end
+
+		TriggerClientEvent('esx:responseLastPosition', _source, position)
 
 	end)
 end)
@@ -346,8 +367,8 @@ local function saveData()
 
 			-- Job and loadout
 			MySQL:executeQuery(
-				"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout' WHERE identifier = '@identifier'",
-				{['@identifier'] = v.identifier, ['@job'] = v.job.id, ['@grade'] = v.job.grade, ['@loadout'] = json.encode(v.loadout)}
+				"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout', position='@position' WHERE identifier = '@identifier'",
+				{['@identifier'] = v.identifier, ['@job'] = v.job.id, ['@grade'] = v.job.grade, ['@loadout'] = json.encode(v.loadout), ['@position'] = json.encode(v.player.coords)}
 			)
 
 		end

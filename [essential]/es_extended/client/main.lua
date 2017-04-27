@@ -31,6 +31,7 @@ AddEventHandler('playerSpawned', function(spawn)
 	HasLoadedLoadout = false
 	PID = GetPlayerServerId(PlayerId())
 	TriggerServerEvent('esx:requestLoadout')
+	TriggerServerEvent('esx:requestLastPosition')
 end)
 
 AddEventHandler('skinchanger:modelLoaded', function()
@@ -146,6 +147,18 @@ AddEventHandler('esx:responseLoadout', function(loadout)
 
 	HasLoadedLoadout = true
 
+end)
+
+RegisterNetEvent('esx:responseLastPosition')
+AddEventHandler('esx:responseLastPosition', function(pos)
+	
+	RequestCollisionAtCoord(pos.x, pos.y, pos.z)
+	while not HasCollisionLoadedAroundEntity(GetPlayerPed(-1)) do
+		RequestCollisionAtCoord(pos.x, pos.y, pos.z)
+		Citizen.Wait(0)
+	end
+
+	SetEntityCoords(GetPlayerPed(-1), pos.x, pos.y, pos.z)
 end)
 
 -- Menu interactions
