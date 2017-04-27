@@ -10,10 +10,11 @@ local Keys = {
 	["NENTER"] = 201, ["N4"] = 108, ["N5"] = 60, ["N6"] = 107, ["N+"] = 96, ["N-"] = 97, ["N7"] = 117, ["N8"] = 61, ["N9"] = 118
 }
 
-local PID             = 0
-local GUI             = {}
-GUI.InventoryIsShowed = false
-GUI.Time              = 0
+local PID              = 0
+local GUI              = {}
+GUI.InventoryIsShowed  = false
+GUI.Time               = 0
+local HasLoadedLoadout = false
 
 function Notification(message)
 	SetNotificationTextEntry("STRING")
@@ -27,7 +28,14 @@ AddEventHandler('esx:showNotification', function(notify)
 end)
 
 AddEventHandler('playerSpawned', function(spawn)
+	HasLoadedLoadout = false
 	PID = GetPlayerServerId(PlayerId())
+	TriggerServerEvent('esx:requestLoadout')
+end)
+
+AddEventHandler('skinchanger:modelLoaded', function()
+	HasLoadedLoadout = false
+	TriggerServerEvent('esx:requestLoadout')
 end)
 
 RegisterNetEvent('esx:activateMoney')
@@ -126,6 +134,20 @@ AddEventHandler('esx:teleport', function(pos)
 
 end)
 
+RegisterNetEvent('esx:responseLoadout')
+AddEventHandler('esx:responseLoadout', function(loadout)
+
+	local playerPed = GetPlayerPed(-1)
+
+	for i=1, #loadout, 1 do
+		local weaponHash = GetHashKey(loadout[i].name)
+		GiveWeaponToPed(playerPed, weaponHash, loadout[i].ammo, false, false)
+	end
+
+	HasLoadedLoadout = true
+
+end)
+
 -- Menu interactions
 Citizen.CreateThread(function()
 	while true do
@@ -170,3 +192,37 @@ if Config.ShowDotAbovePlayer then
 		end
 	end)
 end
+
+-- Save loadout
+Citizen.CreateThread(function()
+	while true do
+
+		Wait(5000)
+
+		if HasLoadedLoadout then
+
+			local playerPed = GetPlayerPed(-1)
+			local loadout   = {}
+
+			for i=1, #Config.Weapons, 1 do
+				
+				local weaponHash = GetHashKey(Config.Weapons[i].name)
+
+				if HasPedGotWeapon(playerPed,  weaponHash,  false) and Config.Weapons[i].name ~= 'WEAPON_UNARMED' then
+
+					local ammo = GetAmmoInPedWeapon(playerPed, weaponHash)
+
+					table.insert(loadout, {
+						name = Config.Weapons[i].name,
+						ammo = ammo,
+					})
+
+				end
+			end
+
+			TriggerServerEvent('esx:updateLoadout', loadout)
+
+		end
+
+	end
+end)

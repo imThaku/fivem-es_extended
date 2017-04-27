@@ -4,7 +4,7 @@ ExtendedPlayer.__index = ExtendedPlayer
 
 -- Meta table for users
 setmetatable(ExtendedPlayer, {
-	__call = function(self, player, accounts, inventory, job)
+	__call = function(self, player, accounts, inventory, job, loadout)
 		
 		local xpl = {}
 
@@ -13,6 +13,7 @@ setmetatable(ExtendedPlayer, {
 		xpl.identifier = player.identifier
 		xpl.inventory  = inventory
 		xpl.job        = job
+		xpl.loadout    = loadout
 
 		return setmetatable(xpl, ExtendedPlayer)
 	end
@@ -121,8 +122,6 @@ function ExtendedPlayer:SetAccountMoney(account, m)
 end
 
 function ExtendedPlayer:addAccountMoney(account, m)
-
-	RconPrint('ExtendedPlayer:addAccountMoney => ' .. account .. ' ' .. m)
 
 	local account           = self:getAccount(account)
 	local newMoney : double = account.money + m

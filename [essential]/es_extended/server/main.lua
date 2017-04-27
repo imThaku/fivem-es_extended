@@ -56,10 +56,16 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 		local job = {}
 
 		local executed_query  = MySQL:executeQuery("SELECT * FROM users WHERE identifier = '@identifier'", {['@identifier'] = user.identifier})
-		local result          = MySQL:getResults(executed_query, {'skin', 'job', 'job_grade'})
+		local result          = MySQL:getResults(executed_query, {'skin', 'job', 'job_grade', 'loadout'})
 
 		job['id']    = result[1].job
 		job['grade'] = result[1].job_grade
+
+		local loadout = {}
+
+		if result[1].loadout ~= nil then
+			loadout = json.decode(result[1].loadout)
+		end
 
 		if job['id'] ~= -1 then
 
@@ -76,12 +82,21 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 			job['grade_name']   = result[1].name
 			job['grade_label']  = result[1].label
 			job['grade_salary'] = result[1].salary
-			job['skin_male']    = json.decode(result[1].skin_male)
-			job['skin_female']  = json.decode(result[1].skin_female)
+
+			job['skin_male']   = {}
+			job['skin_female'] = {}
+
+			if result[1].skin_male ~= nil then
+				job['skin_male'] = json.decode(result[1].skin_male)
+			end
+
+			if result[1].skin_female ~= nil then
+				job['skin_female'] = json.decode(result[1].skin_female)
+			end
 
 		end
 
-		local xPlayer         = ExtendedPlayer(user, accounts, inventory, job)
+		local xPlayer         = ExtendedPlayer(user, accounts, inventory, job, loadout)
 		local missingAccounts = xPlayer:getMissingAccounts()
 
 		if #missingAccounts > 0 then
@@ -115,9 +130,23 @@ AddEventHandler('esx:getPlayerFromId', function(source, cb)
 	cb(Users[source])
 end)
 
-RegisterServerEvent('esx:getPlayers')
 AddEventHandler('esx:getPlayers', function(cb)
 	cb(Users)
+end)
+
+RegisterServerEvent('esx:updateLoadout')
+AddEventHandler('esx:updateLoadout', function(loadout)
+	TriggerEvent('esx:getPlayerFromId', source, function(xPlayer)
+		xPlayer.loadout = loadout
+	end)
+end)
+
+RegisterServerEvent('esx:requestLoadout')
+AddEventHandler('esx:requestLoadout', function()
+	local _source = source
+	TriggerEvent('esx:getPlayerFromId', source, function(xPlayer)
+		TriggerClientEvent('esx:responseLoadout', _source, xPlayer.loadout)
+	end)
 end)
 
 AddEventHandler('playerDropped', function()
@@ -163,6 +192,12 @@ AddEventHandler('playerDropped', function()
 		if itemCount > 0 then
 			MySQL:executeQuery(query)
 		end
+
+		-- Job and loadout
+		MySQL:executeQuery(
+			"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout' WHERE identifier = '@identifier'",
+			{['@identifier'] = Users[source].identifier, ['@job'] = Users[source].job.id, ['@grade'] = Users[source].job.grade, ['@loadout'] = json.encode(Users[source].loadout)}
+		)
 
 		Users[source] = nil
 
@@ -309,10 +344,10 @@ local function saveData()
 				MySQL:executeQuery(query)
 			end
 
-			-- Job
+			-- Job and loadout
 			MySQL:executeQuery(
-				"UPDATE users SET job = '@job', job_grade = '@grade' WHERE identifier = '@identifier'",
-				{['@identifier'] = v.identifier, ['@job'] = v.job.id, ['@grade'] = v.job.grade}
+				"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout' WHERE identifier = '@identifier'",
+				{['@identifier'] = v.identifier, ['@job'] = v.job.id, ['@grade'] = v.job.grade, ['@loadout'] = json.encode(v.loadout)}
 			)
 
 		end
