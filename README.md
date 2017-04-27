@@ -7,6 +7,8 @@ Add support for inventory (press F5 ingame)
 
 Add support for jobs
 
+Loadouts are saved in database and restored on spawn
+
 
 --- INSTALL ---
 
