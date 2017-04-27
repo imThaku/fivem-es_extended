@@ -4,7 +4,8 @@ ALTER TABLE `users`
 ADD COLUMN `skin` LONGTEXT NULL AFTER `money`,
 ADD COLUMN `job` INT NULL DEFAULT 1 AFTER `skin`,
 ADD COLUMN `job_grade` INT NULL DEFAULT 0 AFTER `job`
-ADD COLUMN `loadout` LONGTEXT NULL AFTER `job_grade`;
+ADD COLUMN `loadout` LONGTEXT NULL AFTER `job_grade`
+ADD COLUMN `position` VARCHAR(255) NULL AFTER `loadout`;
 
 CREATE TABLE `items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

@@ -365,7 +365,7 @@ local function saveData()
 				MySQL:executeQuery(query)
 			end
 
-			-- Job and loadout
+			-- Job, loadout and position
 			MySQL:executeQuery(
 				"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout', position='@position' WHERE identifier = '@identifier'",
 				{['@identifier'] = v.identifier, ['@job'] = v.job.id, ['@grade'] = v.job.grade, ['@loadout'] = json.encode(v.loadout), ['@position'] = json.encode(v.player.coords)}
