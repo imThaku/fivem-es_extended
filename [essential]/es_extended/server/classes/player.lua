@@ -105,20 +105,21 @@ function ExtendedPlayer:createAccounts(missingAccounts)
 
 end
 
-function ExtendedPlayer:SetAccountMoney(account, m)
+function ExtendedPlayer:setAccountMoney(account, m)
+	
 	local account           = self:getAccount(account)
 	local prevMoney         = account.money
 	local newMoney : double = m
 
 	account.money = newMoney
 
-	if (prevMoney - newMoney) < 0 then
+	if prevMoney - newMoney < 0 then
 		TriggerClientEvent("esx:addedMoney", self.player.source, account, math.abs(prevMoney - newMoney))
 	else
 		TriggerClientEvent("esx:removedMoney", self.player.source, account, math.abs(prevMoney - newMoney))
 	end
 
-	TriggerClientEvent('exs:activateMoney', self.player.source, self.accounts)
+	TriggerClientEvent('esx:activateMoney', self.player.source, self.accounts)
 end
 
 function ExtendedPlayer:addAccountMoney(account, m)
@@ -129,7 +130,7 @@ function ExtendedPlayer:addAccountMoney(account, m)
 	account.money = newMoney
 
 	TriggerClientEvent("esx:addedMoney", self.player.source, account, m)
-	TriggerClientEvent('esx:activateMoney', self.player.source , self.accounts)
+	TriggerClientEvent('esx:activateMoney', self.player.source, self.accounts)
 end
 
 function ExtendedPlayer:removeAccountMoney(account, m)
@@ -139,7 +140,7 @@ function ExtendedPlayer:removeAccountMoney(account, m)
 	account.money = newMoney
 
 	TriggerClientEvent("esx:removedMoney", self.player.source, account, m)
-	TriggerClientEvent('esx:activateMoney', self.player.source , self.accounts)
+	TriggerClientEvent('esx:activateMoney', self.player.source, self.accounts)
 end
 
 function ExtendedPlayer:getInventoryItem(name)
