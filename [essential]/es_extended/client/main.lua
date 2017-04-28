@@ -27,6 +27,10 @@ AddEventHandler('esx:showNotification', function(notify)
 	Notification(notify)
 end)
 
+AddEventHandler('onClientMapStart', function()
+	NetworkSetTalkerProximity(5.0)
+end)
+
 AddEventHandler('playerSpawned', function(spawn)
 	HasLoadedLoadout = false
 	PID = GetPlayerServerId(PlayerId())
@@ -152,13 +156,16 @@ end)
 RegisterNetEvent('esx:responseLastPosition')
 AddEventHandler('esx:responseLastPosition', function(pos)
 	
-	RequestCollisionAtCoord(pos.x, pos.y, pos.z)
-	while not HasCollisionLoadedAroundEntity(GetPlayerPed(-1)) do
+	if pos ~= nil then
 		RequestCollisionAtCoord(pos.x, pos.y, pos.z)
-		Citizen.Wait(0)
+		while not HasCollisionLoadedAroundEntity(GetPlayerPed(-1)) do
+			RequestCollisionAtCoord(pos.x, pos.y, pos.z)
+			Citizen.Wait(0)
+		end
+
+		SetEntityCoords(GetPlayerPed(-1), pos.x, pos.y, pos.z)
 	end
 
-	SetEntityCoords(GetPlayerPed(-1), pos.x, pos.y, pos.z)
 end)
 
 -- Menu interactions
