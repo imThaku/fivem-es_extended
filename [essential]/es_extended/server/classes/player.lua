@@ -199,8 +199,17 @@ function ExtendedPlayer:setJob(name, grade)
 	self.job['grade_name']   = result[1].name
 	self.job['grade_label']  = result[1].label
 	self.job['grade_salary'] = result[1].salary
-	self.job['skin_male']    = json.decode(result[1].skin_male)
-	self.job['skin_female']  = json.decode(result[1].skin_female)
+
+	self.job['skin_male']    = nil
+	self.job['skin_female']  = nil
+
+	if result[1].skin_male ~= nil then
+		self.job['skin_male'] = json.decode(result[1].skin_male)
+	end
+
+	if self. result[1].skin_female ~= nil then
+		self.job['skin_female'] = json.decode(result[1].skin_female)
+	end
 
 	TriggerClientEvent("esx:setJob", self.player.source, self.job)
 
