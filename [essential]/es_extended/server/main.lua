@@ -58,7 +58,7 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 		local executed_query  = MySQL:executeQuery("SELECT * FROM users WHERE identifier = '@identifier'", {['@identifier'] = user.identifier})
 		local result          = MySQL:getResults(executed_query, {'skin', 'job', 'job_grade', 'loadout'})
 
-		job['id']    = result[1].job
+		job['name']  = result[1].job
 		job['grade'] = result[1].job_grade
 
 		local loadout = {}
@@ -67,33 +67,29 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 			loadout = json.decode(result[1].loadout)
 		end
 
-		if job['id'] ~= -1 then
+		local executed_query  = MySQL:executeQuery("SELECT * FROM jobs WHERE name = '@name'", {['@name'] = job.name})
+		local result          = MySQL:getResults(executed_query, {'id', 'name', 'label'})
 
-			local executed_query  = MySQL:executeQuery("SELECT * FROM jobs WHERE id = '@id'", {['@id'] = job.id})
-			local result          = MySQL:getResults(executed_query, {'id', 'name', 'label'})
+		job['id']    = result[1].id
+		job['name']  = result[1].name
+		job['label'] = result[1].label
 
-			job['id']    = result[1].id
-			job['name']  = result[1].name
-			job['label'] = result[1].label
+		local executed_query  = MySQL:executeQuery("SELECT * FROM job_grades WHERE job_name = '@job_name' AND grade = '@grade'", {['@job_name'] = job.name, ['@grade'] = job.grade})
+		local result          = MySQL:getResults(executed_query, {'name', 'label', 'salary', 'skin_male', 'skin_female'})
 
-			local executed_query  = MySQL:executeQuery("SELECT * FROM job_grades WHERE job_id = '@job_id' AND grade = '@grade'", {['@job_id'] = job.id, ['@grade'] = job.grade})
-			local result          = MySQL:getResults(executed_query, {'name', 'label', 'salary', 'skin_male', 'skin_female'})
+		job['grade_name']   = result[1].name
+		job['grade_label']  = result[1].label
+		job['grade_salary'] = result[1].salary
 
-			job['grade_name']   = result[1].name
-			job['grade_label']  = result[1].label
-			job['grade_salary'] = result[1].salary
+		job['skin_male']   = {}
+		job['skin_female'] = {}
 
-			job['skin_male']   = {}
-			job['skin_female'] = {}
+		if result[1].skin_male ~= nil then
+			job['skin_male'] = json.decode(result[1].skin_male)
+		end
 
-			if result[1].skin_male ~= nil then
-				job['skin_male'] = json.decode(result[1].skin_male)
-			end
-
-			if result[1].skin_female ~= nil then
-				job['skin_female'] = json.decode(result[1].skin_female)
-			end
-
+		if result[1].skin_female ~= nil then
+			job['skin_female'] = json.decode(result[1].skin_female)
 		end
 
 		local xPlayer         = ExtendedPlayer(user, accounts, inventory, job, loadout)
@@ -118,9 +114,7 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 		TriggerClientEvent('es:activateMoney',  source, xPlayer.player.money)
 		TriggerClientEvent('esx:activateMoney', source, xPlayer.accounts)
 		
-		if job['id'] ~= -1 then
-			TriggerClientEvent('esx:setJob', source, xPlayer.job)
-		end
+		TriggerClientEvent('esx:setJob', source, xPlayer.job)
 
 	end)
 end)
@@ -196,7 +190,7 @@ AddEventHandler('playerDropped', function()
 		-- Job, loadout and position
 		MySQL:executeQuery(
 			"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout', position='@position' WHERE identifier = '@identifier'",
-			{['@identifier'] = Users[source].identifier, ['@job'] = Users[source].job.id, ['@grade'] = Users[source].job.grade, ['@loadout'] = json.encode(Users[source].loadout), ['@position'] = json.encode(Users[source].player.coords)}
+			{['@identifier'] = Users[source].identifier, ['@job'] = Users[source].job.name, ['@grade'] = Users[source].job.grade, ['@loadout'] = json.encode(Users[source].loadout), ['@position'] = json.encode(Users[source].player.coords)}
 		)
 
 		Users[source] = nil
@@ -368,7 +362,7 @@ local function saveData()
 			-- Job, loadout and position
 			MySQL:executeQuery(
 				"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout', position='@position' WHERE identifier = '@identifier'",
-				{['@identifier'] = v.identifier, ['@job'] = v.job.id, ['@grade'] = v.job.grade, ['@loadout'] = json.encode(v.loadout), ['@position'] = json.encode(v.player.coords)}
+				{['@identifier'] = v.identifier, ['@job'] = v.job.name, ['@grade'] = v.job.grade, ['@loadout'] = json.encode(v.loadout), ['@position'] = json.encode(v.player.coords)}
 			)
 
 		end
@@ -387,10 +381,8 @@ local function paycheck()
 		TriggerEvent('esx:getPlayers', function(players)
 
 			for i=1, #players, 1 do
-				if players[i].job.id ~= -1 then
-					players[i]:addMoney(players[i].job.grade_salary)
-					TriggerClientEvent('esx:showNotification', players[i].player.source, 'Vous avez recu votre salaire : ' .. '$' .. players[i].job.grade_salary)
-				end
+				players[i]:addMoney(players[i].job.grade_salary)
+				TriggerClientEvent('esx:showNotification', players[i].player.source, 'Vous avez recu votre salaire : ' .. '$' .. players[i].job.grade_salary)
 			end
 
 		end)

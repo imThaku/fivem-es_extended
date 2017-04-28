@@ -193,7 +193,7 @@ function ExtendedPlayer:setJob(name, grade)
 	self.job['name']  = result[1].name
 	self.job['label'] = result[1].label
 
-	local executed_query  = MySQL:executeQuery("SELECT * FROM job_grades WHERE job_id = '@job_id' AND grade = '@grade'", {['@job_id'] = self.job['id'], ['@grade'] = grade})
+	local executed_query  = MySQL:executeQuery("SELECT * FROM job_grades WHERE job_name = '@job_name' AND grade = '@grade'", {['@job_name'] = self.job['name'], ['@grade'] = grade})
 	local result          = MySQL:getResults(executed_query, {'name', 'label', 'salary', 'skin_male', 'skin_female'})
 
 	self.job['grade_name']   = result[1].name
@@ -207,7 +207,7 @@ function ExtendedPlayer:setJob(name, grade)
 		self.job['skin_male'] = json.decode(result[1].skin_male)
 	end
 
-	if self. result[1].skin_female ~= nil then
+	if result[1].skin_female ~= nil then
 		self.job['skin_female'] = json.decode(result[1].skin_female)
 	end
 
@@ -217,7 +217,7 @@ end
 
 function ExtendedPlayer:removeJob()
 	
-	local executed_query  = MySQL:executeQuery("UPDATE users SET job = '-1', job_grade = '-1' WHERE identifier = '@identifier'", {['@identifier'] = self.identifier})
+	local executed_query  = MySQL:executeQuery("UPDATE users SET job = 'unemployed', job_grade = '0' WHERE identifier = '@identifier'", {['@identifier'] = self.identifier})
 
 	self.job['id'  ] = -1
 	self.job['name'] = -1
