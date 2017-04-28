@@ -2,7 +2,7 @@ USE `gta5_gamemode_essential`;
 
 ALTER TABLE `users` 
 ADD COLUMN `skin` LONGTEXT NULL AFTER `money`,
-ADD COLUMN `job` INT NULL DEFAULT 1 AFTER `skin`,
+ADD COLUMN `job` varchar(255) NULL DEFAULT 'unemployed' AFTER `skin`,
 ADD COLUMN `job_grade` INT NULL DEFAULT 0 AFTER `job`
 ADD COLUMN `loadout` LONGTEXT NULL AFTER `job_grade`
 ADD COLUMN `position` VARCHAR(255) NULL AFTER `loadout`;
@@ -16,7 +16,7 @@ CREATE TABLE `items` (
 
 CREATE TABLE `job_grades` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `job_id` int(11) NOT NULL,
+  `job_name` varchar(255) DEFAULT NULL,
   `grade` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `label` varchar(255) NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE `job_grades` (
   PRIMARY KEY (`id`)
 );
 
-INSERT INTO `job_grades` VALUES (1,0,0,'rsa','RSA',200,'{}','{}');
+INSERT INTO `job_grades` (VALUES (1,'unemployed',0,'rsa','RSA',200,'{}','{}');
 
 CREATE TABLE `jobs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
