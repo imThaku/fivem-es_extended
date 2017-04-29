@@ -115,13 +115,6 @@ AddEventHandler('esx:setJob', function(job)
 	})
 end)
 
-RegisterNetEvent('esx:removeJob')
-AddEventHandler('esx:removeJob', function()
-	SendNUIMessage({
-		setJob = false
-	})
-end)
-
 RegisterNetEvent('esx:teleport')
 AddEventHandler('esx:teleport', function(pos)
 

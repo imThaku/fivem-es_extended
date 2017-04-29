@@ -214,14 +214,3 @@ function ExtendedPlayer:setJob(name, grade)
 	TriggerClientEvent("esx:setJob", self.player.source, self.job)
 
 end
-
-function ExtendedPlayer:removeJob()
-	
-	local executed_query  = MySQL:executeQuery("UPDATE users SET job = 'unemployed', job_grade = '0' WHERE identifier = '@identifier'", {['@identifier'] = self.identifier})
-
-	self.job['id'  ] = -1
-	self.job['name'] = -1
-
-	TriggerClientEvent("esx:removeJob", self.player.source)
-
-end
