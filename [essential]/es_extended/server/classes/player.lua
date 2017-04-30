@@ -196,8 +196,6 @@ function ExtendedPlayer:setJob(name, grade)
 	local executed_query  = MySQL:executeQuery("SELECT * FROM job_grades WHERE job_name = '@job_name' AND grade = '@grade'", {['@job_name'] = name, ['@grade'] = grade})
 	local result          = MySQL:getResults(executed_query, {'name', 'label', 'salary', 'skin_male', 'skin_female'})
 
-	RconPrint(result[1].j)
-
 	self.job['grade']        = grade
 	self.job['grade_name']   = result[1].name
 	self.job['grade_label']  = result[1].label
