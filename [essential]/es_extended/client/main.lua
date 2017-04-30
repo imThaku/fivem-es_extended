@@ -196,7 +196,7 @@ if Config.ShowDotAbovePlayer then
 			Wait(0)
 
 			for id = 1, 32 do
-				if NetworkIsPlayerActive(id) and GetPlayerPed(id) ~= GetPlayerPed(-1) then
+				if GetPlayerPed(id) ~= GetPlayerPed(-1) then
 					ped  = GetPlayerPed(id)
 					headId = Citizen.InvokeNative(0xBFEFE3321A3F5015, ped, ('·'), false, false, '', false)
 				end
