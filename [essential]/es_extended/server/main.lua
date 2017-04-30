@@ -380,9 +380,9 @@ local function paycheck()
 
 		TriggerEvent('esx:getPlayers', function(players)
 
-			for i=1, #players, 1 do
-				players[i]:addMoney(players[i].job.grade_salary)
-				TriggerClientEvent('esx:showNotification', players[i].player.source, 'Vous avez recu votre salaire : ' .. '$' .. players[i].job.grade_salary)
+			for k,v in pairs(players) do
+				v:addMoney(v.job.grade_salary)
+				TriggerClientEvent('esx:showNotification', v.player.source, 'Vous avez recu votre salaire : ' .. '$' .. v.job.grade_salary)
 			end
 
 		end)
