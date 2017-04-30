@@ -26,7 +26,7 @@ CREATE TABLE `job_grades` (
   PRIMARY KEY (`id`)
 );
 
-INSERT INTO `job_grades` (VALUES (1,'unemployed',0,'rsa','RSA',200,'{}','{}');
+INSERT INTO `job_grades` VALUES (1,'unemployed',0,'rsa','RSA',200,'{}','{}');
 
 CREATE TABLE `jobs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
