@@ -24,3 +24,7 @@ You can add other types of accounts in es_extended/config.lua
 You have to add account icons in html/img/accounts
 
 SCRIPT NOT COMPATIBLE WITH [Pole-emploi] because it conflicts with some SQL columns
+
+ALL SCRIPT RELATED TO ES_EXTENDED ARE IN ALPHA VERSION AND NEED MORE TESTING
+
+PLEASE REPORT ANY BUG => OPEN ISSUE ON GITHUB
