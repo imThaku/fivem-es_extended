@@ -9,6 +9,9 @@ Add support for jobs
 
 Loadouts are saved in database and restored on spawn
 
+Save loadout
+
+Save position and restore it at spawn
 
 --- INSTALL ---
 
