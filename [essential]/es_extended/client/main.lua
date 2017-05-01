@@ -322,4 +322,5 @@ Citizen.CreateThread(function()
   RequestIpl("ex_sm_13_office_01b")
   RequestIpl("ex_sm_13_office_02a")
   RequestIpl("ex_sm_13_office_02b")
+  RequestIpl("RC12B_HospitalInterior")	-- 330.459 -584.8196 42.3174
 end)
