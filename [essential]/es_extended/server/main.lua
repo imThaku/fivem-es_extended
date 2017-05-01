@@ -144,20 +144,22 @@ AddEventHandler('esx:requestLoadout', function()
 end)
 
 AddEventHandler('playerDropped', function()
-	
+
 	if Users[source] ~= nil then
 		
+		local query = ''
+
 		-- User accounts
-		local query     = ''
 		local itemCount = 0
+		local subQuery  = '';
 
 		for i=1, #Users[source].accounts, 1 do
-			query = query .. "UPDATE user_accounts SET `money`='" .. Users[source].accounts[i].money .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND name = '" .. Users[source].accounts[i].name .. "';"
+			subQuery = subQuery .. "UPDATE user_accounts SET `money`='" .. Users[source].accounts[i].money .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND name = '" .. Users[source].accounts[i].name .. "';"
 			itemCount = itemCount + 1
 		end
 
 		if itemCount > 0 then
-			MySQL:executeQuery(query)
+			query = query .. subQuery
 		end
 
 		-- Inventory items
@@ -166,34 +168,34 @@ AddEventHandler('playerDropped', function()
 		local executed_query  = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = Users[source].identifier})
 		local result          = MySQL:getResults(executed_query, {'identifier', 'item', 'count'}, "id")
 		local itemCount = 0
+		
 		for i=1, #result, 1 do
 			dbInventory[result[i].item] = result[i].count
 		end
 
-		local query = ''
+		local subQuery = ''
 		itemCount   = 0
 
 		for i=1, #Users[source].inventory, 1 do
 			if dbInventory[Users[source].inventory[i].item] == nil then
-				query = query .. "INSERT INTO user_inventory (identifier, item, count) VALUES ('" .. Users[source].identifier .. "', '" .. Users[source].inventory[i].item .. "', '" .. Users[source].inventory[i].count .. "');"
+				subQuery = subQuery .. "INSERT INTO user_inventory (identifier, item, count) VALUES ('" .. Users[source].identifier .. "', '" .. Users[source].inventory[i].item .. "', '" .. Users[source].inventory[i].count .. "');"
 			else
-				query = query .. "UPDATE user_inventory SET `count`='" .. Users[source].inventory[i].count .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND item = '" .. Users[source].inventory[i].item .. "';"
+				subQuery = subQuery .. "UPDATE user_inventory SET `count`='" .. Users[source].inventory[i].count .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND item = '" .. Users[source].inventory[i].item .. "';"
 			end
 
 			itemCount = itemCount + 1
 		end
 
 		if itemCount > 0 then
-			MySQL:executeQuery(query)
+			query = query .. subQuery
 		end
 
 		-- Job, loadout and position
-		MySQL:executeQuery(
-			"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout', position='@position' WHERE identifier = '@identifier'",
-			{['@identifier'] = Users[source].identifier, ['@job'] = Users[source].job.name, ['@grade'] = Users[source].job.grade, ['@loadout'] = json.encode(Users[source].loadout), ['@position'] = json.encode(Users[source].player.coords)}
-		)
+		query = query .. "UPDATE users SET job = '" .. Users[source].job.name .. "', job_grade = '" .. Users[source].job.grade .. "', loadout = '" .. json.encode(Users[source].loadout) .. "', position='" .. json.encode(Users[source].player.coords) .. "' WHERE identifier = '" .. Users[source].identifier .. "';"
 
 		Users[source] = nil
+
+		MySQL:executeQuery(query)
 
 	end
 
@@ -317,19 +319,23 @@ end)
 local function saveData()
 	
 	SetTimeout(60000, function()
+		
+		local query     = ''
+		local userCount = 0
+
 		for k,v in pairs(Users)do
 			
 			-- User accounts
-			local query     = ''
+			local subQuery  = ''
 			local itemCount = 0
 
 			for i=1, #v.accounts, 1 do
-				query = query .. "UPDATE user_accounts SET `money`='" .. v.accounts[i].money .. "' WHERE identifier = '" .. v.identifier .. "' AND name = '" .. v.accounts[i].name .. "';"
+				subQuery = subQuery .. "UPDATE user_accounts SET `money`='" .. v.accounts[i].money .. "' WHERE identifier = '" .. v.identifier .. "' AND name = '" .. v.accounts[i].name .. "';"
 				itemCount = itemCount + 1
 			end
 
 			if itemCount > 0 then
-				MySQL:executeQuery(query)
+				query = query .. subQuery
 			end
 
 			-- Inventory items
@@ -342,29 +348,31 @@ local function saveData()
 				dbInventory[result[i].item] = result[i].count
 			end
 
-			local query     = ''
+			local subQuery     = ''
 			local itemCount = 0
 
 			for i=1, #v.inventory, 1 do
 				if dbInventory[v.inventory[i].item] == nil then
-					query = query .. "INSERT INTO user_inventory (identifier, item, count) VALUES ('" .. v.identifier .. "', '" .. v.inventory[i].item .. "', '" .. v.inventory[i].count .. "');"
+					subQuery = subQuery .. "INSERT INTO user_inventory (identifier, item, count) VALUES ('" .. v.identifier .. "', '" .. v.inventory[i].item .. "', '" .. v.inventory[i].count .. "');"
 				else
-					query = query .. "UPDATE user_inventory SET `count`='" .. v.inventory[i].count .. "' WHERE identifier = '" .. v.identifier .. "' AND item = '" .. v.inventory[i].item .. "';"
+					subQuery = subQuery .. "UPDATE user_inventory SET `count`='" .. v.inventory[i].count .. "' WHERE identifier = '" .. v.identifier .. "' AND item = '" .. v.inventory[i].item .. "';"
 				end
 
 				itemCount = itemCount + 1
 			end
 
 			if itemCount > 0 then
-				MySQL:executeQuery(query)
+				query = query .. subQuery
 			end
 
 			-- Job, loadout and position
-			MySQL:executeQuery(
-				"UPDATE users SET job = '@job', job_grade = '@grade', loadout = '@loadout', position='@position' WHERE identifier = '@identifier'",
-				{['@identifier'] = v.identifier, ['@job'] = v.job.name, ['@grade'] = v.job.grade, ['@loadout'] = json.encode(v.loadout), ['@position'] = json.encode(v.player.coords)}
-			)
+			query = query .. "UPDATE users SET job = '" .. v.job.name .. "', job_grade = '" .. v.job.grade .. "', loadout = '" .. json.encode(v.loadout) .. "', position='" .. json.encode(v.player.coords) .. "' WHERE identifier = '" .. v.identifier .. "';"
 
+			userCount = userCount + 1
+		end
+
+		if userCount > 0 then
+			MySQL:executeQuery(query)
 		end
 
 		saveData()
