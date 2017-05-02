@@ -58,14 +58,14 @@ function MySQL._getFieldByName(self, reader, name)
 	local typ     = tostring(reader:GetFieldType(name))
 	local ordinal = reader:GetOrdinal(name)
 	
-	if(typ == "System.DateTime")then
+	if(reader:IsDBNull(ordinal)) then
+		return nil
+	elseif(typ == "System.DateTime")then
 		return reader:GetDateTime(name)
 	elseif(typ == "System.Double")then
 		return reader:GetDouble(name)
 	elseif(typ == "System.Int32")then
 		return reader:GetInt32(name)
-	elseif(reader:IsDBNull(ordinal)) then
-		return nil
 	else
 	  return reader:GetString(name)
 	end
