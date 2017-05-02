@@ -1,6 +1,8 @@
 # fivem-es_extended
 FiveM Essential Extended
 
+You need essentialmode and es_admin activated
+
 Add support for accounts (bank / black money) you can also add others accounts
 
 Add support for inventory (press F5 ingame)
