@@ -24,33 +24,48 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 			}
 		end
 
-		local inventory = {}
-		local items     = {}
-
-		local executed_query  = MySQL:executeQuery("SELECT * FROM items")
-		local result          = MySQL:getResults(executed_query, {'name', 'label'})
-
-		for i=1, #result, 1 do
-			inventory[i] = {
-				item  = result[i].name,
-				count = 0,
-				label = result[i].label
-			}
-		end
+		local items          = {}
+		local executed_query = MySQL:executeQuery("SELECT * FROM items")
+		local result         = MySQL:getResults(executed_query, {'name', 'label'})
 
 		for i=1, #result, 1 do
 			items[result[i].name] = result[i].label
 		end
 
-		local executed_query  = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = user.identifier})
-		local result          = MySQL:getResults(executed_query, {'item', 'count'}, "id")
+		local inventory      = {}
+		local executed_query = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = user.identifier})
+		local result         = MySQL:getResults(executed_query, {'item', 'count'}, "id")
 
 		for i=1, #result, 1 do
-			inventory[i] = {
+			table.insert(inventory, {
 				item  = result[i].item,
 				count = result[i].count,
 				label = items[result[i].item]
-			}
+			})
+		end
+
+		for k,v in pairs(items) do
+
+			local found = false
+
+			for j=1, #inventory, 1 do
+				if inventory[j].item == k then
+					found = true
+					break
+				end
+			end
+
+			if not found then
+				
+				table.insert(inventory, {
+					item  = k,
+					count = 0,
+					label = v
+				})
+
+				MySQL:executeQuery("INSERT INTO user_inventory (identifier, item, count) VALUES ('@identifier', '@item', '@count')", {['@identifier'] = user.identifier, ['@item'] = k, ['@count'] = 0})
+			end
+
 		end
 
 		local job = {}
@@ -163,26 +178,11 @@ AddEventHandler('playerDropped', function()
 		end
 
 		-- Inventory items
-		local dbInventory = {}
-
-		local executed_query  = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = Users[source].identifier})
-		local result          = MySQL:getResults(executed_query, {'identifier', 'item', 'count'}, "id")
-		local itemCount = 0
-		
-		for i=1, #result, 1 do
-			dbInventory[result[i].item] = result[i].count
-		end
-
-		local subQuery = ''
-		itemCount   = 0
+		local subQuery  = ''
+		local itemCoutn = 0
 
 		for i=1, #Users[source].inventory, 1 do
-			if dbInventory[Users[source].inventory[i].item] == nil then
-				subQuery = subQuery .. "INSERT INTO user_inventory (identifier, item, count) VALUES ('" .. Users[source].identifier .. "', '" .. Users[source].inventory[i].item .. "', '" .. Users[source].inventory[i].count .. "');"
-			else
-				subQuery = subQuery .. "UPDATE user_inventory SET `count`='" .. Users[source].inventory[i].count .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND item = '" .. Users[source].inventory[i].item .. "';"
-			end
-
+			subQuery  = subQuery .. "UPDATE user_inventory SET `count`='" .. Users[source].inventory[i].count .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND item = '" .. Users[source].inventory[i].item .. "';"
 			itemCount = itemCount + 1
 		end
 
@@ -339,25 +339,11 @@ local function saveData()
 			end
 
 			-- Inventory items
-			local dbInventory = {}
-
-			local executed_query  = MySQL:executeQuery("SELECT * FROM user_inventory WHERE identifier = '@identifier'", {['@identifier'] = v.identifier})
-			local result          = MySQL:getResults(executed_query, {'identifier', 'item', 'count'}, "id")
-
-			for i=1, #result, 1 do
-				dbInventory[result[i].item] = result[i].count
-			end
-
-			local subQuery     = ''
+			local subQuery  = ''
 			local itemCount = 0
 
 			for i=1, #v.inventory, 1 do
-				if dbInventory[v.inventory[i].item] == nil then
-					subQuery = subQuery .. "INSERT INTO user_inventory (identifier, item, count) VALUES ('" .. v.identifier .. "', '" .. v.inventory[i].item .. "', '" .. v.inventory[i].count .. "');"
-				else
-					subQuery = subQuery .. "UPDATE user_inventory SET `count`='" .. v.inventory[i].count .. "' WHERE identifier = '" .. v.identifier .. "' AND item = '" .. v.inventory[i].item .. "';"
-				end
-
+				subQuery  = subQuery .. "UPDATE user_inventory SET `count`='" .. v.inventory[i].count .. "' WHERE identifier = '" .. v.identifier .. "' AND item = '" .. v.inventory[i].item .. "';"
 				itemCount = itemCount + 1
 			end
 
