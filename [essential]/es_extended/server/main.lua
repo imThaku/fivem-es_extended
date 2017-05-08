@@ -240,6 +240,56 @@ AddEventHandler('esx:requestLastPosition', function()
 	end)
 end)
 
+RegisterServerEvent('esx:removeInventoryItem')
+AddEventHandler('esx:removeInventoryItem', function(item, count)
+	
+	local _source = source
+
+	if count == nil or count <= 0 then
+		TriggerClientEvent('esx:showNotification', _source, 'Quantité invalide')
+	else
+
+		TriggerEvent('esx:getPlayerFromId', source, function(xPlayer)
+
+			local foundItem = nil
+
+			for i=1, #xPlayer.inventory, 1 do
+				if xPlayer.inventory[i].item == item then
+					foundItem = xPlayer.inventory[i]
+				end
+			end
+
+			if count > foundItem.count then
+				TriggerClientEvent('esx:showNotification', _source, 'Quantité invalide')
+			else
+				
+				TriggerClientEvent('esx:showNotification', _source, 'Suppression dans 5 minutes')
+				
+				SetTimeout(Config.RemoveInventoryItemDelay, function()
+					
+					local remainingCount = xPlayer:getInventoryItem(item).count
+					local total          = count
+
+					if remainingCount < count then
+						total = remainingCount
+					end
+					
+					if total > 0 then
+						xPlayer:removeInventoryItem(item, total)
+						TriggerClientEvent('esx:showNotification', _source, 'Vous avez jeté ' .. foundItem.label .. ' x' .. total)
+					end
+
+				end)
+
+			end
+
+		end)
+
+	end
+
+end)
+
+
 TriggerEvent('es:addGroupCommand', 'tp', 'admin', function(source, args, user)
 
 	TriggerClientEvent("esx:teleport", source, {

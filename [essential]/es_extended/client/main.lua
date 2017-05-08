@@ -10,16 +10,44 @@ local Keys = {
 	["NENTER"] = 201, ["N4"] = 108, ["N5"] = 60, ["N6"] = 107, ["N+"] = 96, ["N-"] = 97, ["N7"] = 117, ["N8"] = 61, ["N9"] = 118
 }
 
-local PID              = 0
-local GUI              = {}
-GUI.InventoryIsShowed  = false
-GUI.Time               = 0
-local HasLoadedLoadout = false
+local PID                       = 0
+local GUI                       = {}
+GUI.InventoryIsShowed           = false
+GUI.RemoveInventoryItemIsShowed = false
+GUI.Time                        = 0
+local HasLoadedLoadout          = false
 
 function Notification(message)
 	SetNotificationTextEntry("STRING")
 	AddTextComponentString(message)
 	DrawNotification(0,1)
+end
+
+function showInventory(inventory)
+
+	local items = {}
+
+	for i=1, #inventory, 1 do
+		if inventory[i].count > 0 then
+			table.insert(items, {
+				label = inventory[i].label .. ' x' .. inventory[i].count,
+				value = inventory[i].item,
+				type  = 'item_standard',
+				count = inventory[i].count,
+			})
+		end
+	end
+
+	SendNUIMessage({
+		showMenu = true,
+		menu     = 'inventory',
+		items    = items
+	})
+
+	SendNUIMessage({
+		showControls = false
+	})
+
 end
 
 RegisterNetEvent('esx:showNotification')
@@ -80,31 +108,48 @@ end)
 RegisterNetEvent('esx:responsePlayerDataForGUI')
 AddEventHandler('esx:responsePlayerDataForGUI', function(data)
 
+	showInventory(data.inventory)
+
 	SendNUIMessage({
-		setInventoryDisplay = true,
-		inventory           = data.inventory
+		showMenu = true,
+		menu     = 'inventory',
+		items    = items
+	})
+
+	SendNUIMessage({
+		showControls = false
 	})
 
 end)
 
 RegisterNetEvent('esx:addInventoryItem')
 AddEventHandler('esx:addInventoryItem', function(inventory, item, count)
+	
 	SendNUIMessage({
 		addInventoryItem = true,
-		inventory        = inventory,
 		item             = item,
 		count            = count
 	})
+
+	if GUI.InventoryIsShowed then
+		showInventory(inventory)
+	end
+
 end)
 
 RegisterNetEvent('esx:removeInventoryItem')
 AddEventHandler('esx:removeInventoryItem', function(inventory, item, count)
+	
 	SendNUIMessage({
 		removeInventoryItem = true,
-		inventory           = inventory,
 		item                = item,
 		count               = count
 	})
+
+	if GUI.InventoryIsShowed then
+		showInventory(inventory)
+	end
+
 end)
 
 RegisterNetEvent('esx:setJob')
@@ -161,31 +206,77 @@ AddEventHandler('esx:responseLastPosition', function(pos)
 
 end)
 
--- Menu interactions
-Citizen.CreateThread(function()
-	while true do
+RegisterNUICallback('select', function(data, cb)
 
-  	Wait(0)
+		if data.menu == 'inventory' then
 
-  	if IsControlPressed(0, Keys["F5"]) and not GUI.InventoryIsShowed and (GetGameTimer() - GUI.Time) > 300 then
-  		
-  		TriggerServerEvent('esx:requestPlayerDataForGUI')
-
-  		GUI.InventoryIsShowed = true
-	  	GUI.Time              = GetGameTimer()
-    end
-
-  	if IsControlPressed(0, Keys["F5"]) and GUI.InventoryIsShowed and (GetGameTimer() - GUI.Time) > 300 then
+			local items = {
+				{label = 'Jeter', type = data.type, action = 'remove', value = data.val},
+				{label = 'Retour', action = 'return'}
+			}
 
 			SendNUIMessage({
-				setInventoryDisplay = false
+				showMenu = true,
+				menu     = 'inventory_actions',
+				items    = items
 			})
 
-  		GUI.InventoryIsShowed = false
-	  	GUI.Time              = GetGameTimer()
-    end
+			SendNUIMessage({
+				showControls = false
+			})
 
-  end
+		end
+
+		if data.menu == 'inventory_actions' then
+
+			TriggerServerEvent('esx:clientLog', json.encode(data))
+
+			if data.action == 'return' then
+  			TriggerServerEvent('esx:requestPlayerDataForGUI')
+			end
+
+			if data.action == 'remove' then
+  			
+				SendNUIMessage({
+					showRemoveInventoryItem = true,
+					item                    = data.val
+				})
+
+				GUI.RemoveInventoryItemIsShowed = true
+
+				SetNuiFocus(true)
+
+			end
+
+		end
+
+		cb('ok')
+
+end)
+
+
+RegisterNUICallback('remove_inventory_item', function(data, cb)
+
+	local count = tonumber(data.count)
+
+	if count == nil then
+		TriggerEvent('esx:showNotification', 'Quantité invalide')
+	else
+		TriggerServerEvent('esx:removeInventoryItem', data.item, data.count)
+	end
+
+	SendNUIMessage({
+		showRemoveInventoryItem = false
+	})
+
+	GUI.RemoveInventoryItemIsShowed = false
+
+	SetNuiFocus(false)
+
+	TriggerServerEvent('esx:requestPlayerDataForGUI')
+	
+	cb('ok')
+
 end)
 
 -- Dot above head
@@ -197,7 +288,7 @@ if Config.ShowDotAbovePlayer then
 
 			for id = 1, 32 do
 				if GetPlayerPed(id) ~= GetPlayerPed(-1) then
-					ped  = GetPlayerPed(id)
+					ped    = GetPlayerPed(id)
 					headId = Citizen.InvokeNative(0xBFEFE3321A3F5015, ped, ('·'), false, false, '', false)
 				end
 			end
@@ -238,4 +329,115 @@ Citizen.CreateThread(function()
 		end
 
 	end
+end)
+
+-- Menu interactions
+Citizen.CreateThread(function()
+	while true do
+
+  	Wait(0)
+
+    if GUI.RemoveInventoryItemIsShowed then
+
+      DisableControlAction(0, 1,   true) -- LookLeftRight
+      DisableControlAction(0, 2,   true) -- LookUpDown
+      DisableControlAction(0, 142, true) -- MeleeAttackAlternate
+      DisableControlAction(0, 106, true) -- VehicleMouseControlOverride
+
+      DisableControlAction(0, 12, true) -- WeaponWheelUpDown
+      DisableControlAction(0, 14, true) -- WeaponWheelNext
+      DisableControlAction(0, 15, true) -- WeaponWheelPrev
+      DisableControlAction(0, 16, true) -- SelectNextWeapon
+      DisableControlAction(0, 17, true) -- SelectPrevWeapon
+
+      if IsDisabledControlJustReleased(0, 142) then -- MeleeAttackAlternate
+        SendNUIMessage({
+          click = true
+        })
+      end
+
+    else
+
+	  	if IsControlPressed(0, Keys["F5"]) and not GUI.InventoryIsShowed and (GetGameTimer() - GUI.Time) > 300 then
+	  		
+	  		TriggerServerEvent('esx:requestPlayerDataForGUI')
+
+	  		GUI.InventoryIsShowed = true
+		  	GUI.Time              = GetGameTimer()
+	    end
+
+	  	if IsControlPressed(0, Keys["F5"]) and GUI.InventoryIsShowed and (GetGameTimer() - GUI.Time) > 300 then
+
+				SendNUIMessage({
+					showMenu     = false,
+					showControls = false
+				})
+
+	  		GUI.InventoryIsShowed = false
+		  	GUI.Time              = GetGameTimer()
+	    end
+
+			if IsControlPressed(0, Keys['ENTER']) and (GetGameTimer() - GUI.Time) > 300 then
+
+				SendNUIMessage({
+					enterPressed = true
+				})
+
+				GUI.Time = GetGameTimer()
+
+			end
+
+			if IsControlPressed(0, Keys['BACKSPACE']) and (GetGameTimer() - GUI.Time) > 300 then
+
+				SendNUIMessage({
+					backspacePressed = true
+				})
+
+				GUI.Time = GetGameTimer()
+
+			end
+
+			if IsControlPressed(0, Keys['LEFT']) and (GetGameTimer() - GUI.Time) > 300 then
+
+				SendNUIMessage({
+					move = 'LEFT'
+				})
+
+				GUI.Time = GetGameTimer()
+
+			end
+
+			if IsControlPressed(0, Keys['RIGHT']) and (GetGameTimer() - GUI.Time) > 300 then
+
+				SendNUIMessage({
+					move = 'RIGHT'
+				})
+
+				GUI.Time = GetGameTimer()
+
+			end
+
+			if IsControlPressed(0, Keys['TOP']) and (GetGameTimer() - GUI.Time) > 300 then
+
+				SendNUIMessage({
+					move = 'UP'
+				})
+
+				GUI.Time = GetGameTimer()
+
+			end
+
+			if IsControlPressed(0, Keys['DOWN']) and (GetGameTimer() - GUI.Time) > 300 then
+
+				SendNUIMessage({
+					move = 'DOWN'
+				})
+
+				GUI.Time = GetGameTimer()
+
+			end
+
+		end
+
+  end
 end)

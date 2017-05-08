@@ -1,0 +1,146 @@
+@font-face {
+	font-family: bankgothic;
+	src: url('../bankgothic.ttf');
+}
+
+@font-face {
+	font-family: pcdown;
+	src: url('../pdown.ttf');
+}
+
+#cursor {
+  position: absolute;
+  z-index: 999999;
+  display:  none;
+}
+
+#controls {
+	font-family   : pcdown;
+	font-size     : 3em;
+	color         : #FFF;
+	position      : absolute;
+	bottom        : 40;
+	right         : 40;
+	
+	text-shadow:
+   	-1px -1px 0 #000,
+		 1px -1px 0 #000,
+		-1px  1px 0 #000,
+		 1px  1px 0 #000
+	;
+}
+
+.controls {
+	display: none;
+}
+
+.menu {
+		font-family     : bankgothic;  
+    min-width       : 350px;
+    background-color: #506be6;
+    color           : #fff;
+    box-shadow      : 0px 0px 50px 0px #000;
+    position        : absolute;
+    left            : 40;
+    top             : 40; 
+}
+
+.menu .head {
+	text-align  : center;
+  height      : 40px;
+  line-height : 40px;
+}
+
+.menu .menu-items .menu-item {
+  height          : 40px;
+  display         : block;
+  background-color: #f1f1f1;
+  box-shadow      : inset 1px 0px 0px 1px #b8b8b8;
+  height          : 32px;
+  line-height     : 32px;
+  color           : #3A3A3A;
+	text-align      :  center;
+}
+
+.menu .menu-items .menu-item.selected {
+	background-color: #d0d0d0;
+}
+
+.tiny {
+	font-size: 29px;
+	position: absolute; right: 10;
+}
+
+#container {
+	position: absolute;
+	top: 80; right: 40;
+}
+
+#money, #job {
+	font-family: pcdown;
+	font-size: 35px;
+	color: white;
+	padding: 4px;
+	text-shadow:
+   	-1px -1px 0 #000,
+		 1px -1px 0 #000,
+		-1px  1px 0 #000,
+		 1px  1px 0 #000;
+
+	text-align: right;
+}
+
+#menu_inventory, #menu_inventory_actions {
+  right : 40;
+  bottom: 40;
+  left  : initial;
+  top   : initial;
+}
+
+#inventory_notif {
+	font-family: bankgothic; 
+	position   : absolute; 
+  right      : 40;
+  bottom     : 40;
+  font-size  : 2em;
+  font-weight: bold;
+  color      : #FFF;
+	text-shadow:
+   	-1px -1px 0 #000,
+		 1px -1px 0 #000,
+		-1px  1px 0 #000,
+		 1px  1px 0 #000;
+}
+
+#remove_inventory_item {
+
+  font-family     : bankgothic;  
+  background-color: #506be6;
+  color           : #fff;
+  box-shadow      : 0px 0px 50px 0px #000;
+  position        : absolute;
+  overflow        : hidden;
+  top             :  50%;
+  left            :  50%;
+  width           : 400px;
+  height          : 110px;
+  margin-top      : -55px;
+  margin-left     : -200px;
+  display         : none; 
+}
+
+#remove_inventory_item .head {
+  text-align  : center;
+  height      : 40px;
+  line-height : 40px;
+}
+
+#remove_inventory_item_count {
+  width : 400px;
+  height: 32px;
+}
+
+#remove_inventory_item_send {
+  width : 400px;
+  height: 40px;
+}
