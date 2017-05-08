@@ -229,8 +229,6 @@ RegisterNUICallback('select', function(data, cb)
 
 		if data.menu == 'inventory_actions' then
 
-			TriggerServerEvent('esx:clientLog', json.encode(data))
-
 			if data.action == 'return' then
   			TriggerServerEvent('esx:requestPlayerDataForGUI')
 			end
