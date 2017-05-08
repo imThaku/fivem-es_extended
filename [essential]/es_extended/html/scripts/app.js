@@ -373,7 +373,11 @@
 		}
 
 		if(data.setJob === true){
-			$('#job').html(data.job.label + ' - ' + data.job.grade_label)
+
+			if(data.job.grade_label && data.job.grade_label != '')
+				$('#job').html(data.job.label + ' - ' + data.job.grade_label);
+			else
+				$('#job').html(data.job.label);
 		}
 
 		if(data.setJob === false){
