@@ -1,6 +1,8 @@
 # fivem-es_extended
 FiveM Essential Extended
 
+![screenshot](http://gta-metropolis.ml/Files/Image/Acceuil.jpg)
+
 You need essentialmode and es_admin activated
 
 Add support for accounts (bank / black money) you can also add others accounts
@@ -30,5 +32,3 @@ SCRIPT NOT COMPATIBLE WITH [Pole-emploi] because it conflicts with some SQL colu
 ALL SCRIPT RELATED TO ES_EXTENDED ARE IN ALPHA VERSION AND NEED MORE TESTING
 
 PLEASE REPORT ANY BUG => OPEN ISSUE ON GITHUB
-
-![screenshot](http://gta-metropolis.ml/Files/Image/Acceuil.jpg)
