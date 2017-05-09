@@ -289,6 +289,7 @@ AddEventHandler('esx:removeInventoryItem', function(item, count)
 
 end)
 
+TriggerEvent("es:addGroup", "jobmaster", "user", function(group) end)
 
 TriggerEvent('es:addGroupCommand', 'tp', 'admin', function(source, args, user)
 
@@ -302,17 +303,9 @@ end, function(source, args, user)
 	TriggerClientEvent('chatMessage', source, "SYSTEM", {255, 0, 0}, "Insufficient Permissions.")
 end)
 
-TriggerEvent('es:addGroupCommand', 'setjob', 'owner', function(source, args, user)
+TriggerEvent('es:addGroupCommand', 'setjob', 'jobmaster', function(source, args, user)
 	TriggerEvent('esx:getPlayerFromId', tonumber(args[2]), function(xPlayer)
 		xPlayer:setJob(args[3], tonumber(args[4]))
-	end)
-end, function(source, args, user)
-	TriggerClientEvent('chatMessage', source, "SYSTEM", {255, 0, 0}, "Insufficient Permissions.")
-end)
-
-TriggerEvent('es:addGroupCommand', 'removejob', 'owner', function(source, args, user)
-	TriggerEvent('esx:getPlayerFromId', tonumber(args[2]), function(xPlayer)
-		xPlayer:removeJob()
 	end)
 end, function(source, args, user)
 	TriggerClientEvent('chatMessage', source, "SYSTEM", {255, 0, 0}, "Insufficient Permissions.")
