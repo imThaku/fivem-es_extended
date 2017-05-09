@@ -5,13 +5,15 @@ You need essentialmode and es_admin activated
 
 Add support for accounts (bank / black money) you can also add others accounts
 
-Add support for inventory (press F5 ingame)
+Add support for inventory (press F5 ingame) => Players can now remove items from inventory
 
 Add support for jobs
 
 Loadouts are saved in database and restored on spawn
 
 Positions are saved in database and restored on spawn
+
+Wiki => https://github.com/indilo53/fivem-es_extended/wiki
 
 --- INSTALL ---
 
