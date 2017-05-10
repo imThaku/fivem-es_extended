@@ -97,11 +97,19 @@ AddEventHandler("esx:removedMoney", function(a, m)
 	})
 end)
 
-RegisterNetEvent("exs:setMoneyDisplay")
+RegisterNetEvent("esx:setMoneyDisplay")
 AddEventHandler("esx:setMoneyDisplay", function(val)
 	SendNUIMessage({
-		setDisplay = true,
-		display    = val
+		setMoneyDisplay = true,
+		display         = val
+	})
+end)
+
+RegisterNetEvent("esx:setJobDisplay")
+AddEventHandler("esx:setJobDisplay", function(val)
+	SendNUIMessage({
+		setJobDisplay = true,
+		display       = val
 	})
 end)
 
@@ -327,6 +335,26 @@ Citizen.CreateThread(function()
 		end
 
 	end
+end)
+
+-- Pause menu disable hud display
+local isPaused = false
+
+Citizen.CreateThread(function()
+  while true do
+    Citizen.Wait(1)
+    if IsPauseMenuActive() and not isPaused then
+      isPaused = true
+      TriggerEvent('es:setMoneyDisplay', 0.0)
+      TriggerEvent('esx:setMoneyDisplay', 0.0)
+      TriggerEvent('esx:setJobDisplay', 0.0)      
+    elseif not IsPauseMenuActive() and isPaused then
+      isPaused = false
+      TriggerEvent('es:setMoneyDisplay', 1.0)
+      TriggerEvent('esx:setMoneyDisplay', 1.0)
+      TriggerEvent('esx:setJobDisplay', 1.0)   
+    end
+  end
 end)
 
 -- Menu interactions

@@ -348,8 +348,12 @@
 			}, 1000)
 		}
 */
-		if(data.setDisplay == true){
+		if(data.setMoneyDisplay == true){
 			$("#money").css('opacity', data.display)
+		}
+
+		if(data.setJobDisplay == true){
+			$("#job").css('opacity', data.display)
 		}
 
 		if(data.removeInventoryItem){
