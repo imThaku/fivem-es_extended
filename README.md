@@ -19,6 +19,8 @@ Wiki => https://github.com/indilo53/fivem-es_extended/wiki
 
 --- INSTALL ---
 
+Make sure you have essentialmode and es_admin loaded before es_extended
+
 1) Import es_extended.sql in your database
 2) Copy folders in cfx-server/ressources
 
