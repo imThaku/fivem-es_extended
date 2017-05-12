@@ -16,6 +16,18 @@ GUI.InventoryIsShowed           = false
 GUI.RemoveInventoryItemIsShowed = false
 GUI.Time                        = 0
 local HasLoadedLoadout          = false
+local TimeoutCallbacks          = {}
+
+function _SetTimeout(msec, cb)
+	table.insert(TimeoutCallbacks, {
+		time = GetGameTimer() + msec,
+		cb   = cb
+	})
+end
+
+AddEventHandler('esx:setTimeout', function(msec, cb)
+	_SetTimeout(msec, cb)
+end)
 
 function Notification(message)
 	SetNotificationTextEntry("STRING")
@@ -466,4 +478,26 @@ Citizen.CreateThread(function()
 		end
 
   end
+end)
+
+-- _SetTimeout
+Citizen.CreateThread(function()
+	
+	while true do
+
+		Wait(0)
+
+		local currTime = GetGameTimer()
+
+		for i=1, #TimeoutCallbacks, 1 do
+
+			if currTime >= TimeoutCallbacks[i].time then
+				TimeoutCallbacks[i].cb()
+				TimeoutCallbacks[i] = nil
+			end
+
+		end
+
+	end
+
 end)
