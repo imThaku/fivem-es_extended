@@ -1,7 +1,8 @@
 require "resources/[essential]/es_extended/lib/MySQL"
 MySQL:open("127.0.0.1", "gta5_gamemode_essential", "root", "foo")
 
-local Users = {}
+local Users                = {}
+local UsableItemsCallbacks = {}
 
 RegisterServerEvent('esx:clientLog')
 AddEventHandler('esx:clientLog', function(str)
@@ -37,10 +38,14 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 		local result         = MySQL:getResults(executed_query, {'item', 'count'}, "id")
 
 		for i=1, #result, 1 do
+
+			local usable = UsableItemsCallbacks[result[i].item] ~= nil
+
 			table.insert(inventory, {
-				item  = result[i].item,
-				count = result[i].count,
-				label = items[result[i].item]
+				item   = result[i].item,
+				count  = result[i].count,
+				label  = items[result[i].item],
+				usable = usable
 			})
 		end
 
@@ -238,6 +243,17 @@ AddEventHandler('esx:requestLastPosition', function()
 		TriggerClientEvent('esx:responseLastPosition', _source, position)
 
 	end)
+end)
+
+
+RegisterServerEvent('esx:registerUsableItem')
+AddEventHandler('esx:registerUsableItem', function(item, cb)
+	UsableItemsCallbacks[item] = cb
+end)
+
+RegisterServerEvent('esx:useItem')
+AddEventHandler('esx:useItem', function(item)
+	UsableItemsCallbacks[item](source)
 end)
 
 RegisterServerEvent('esx:removeInventoryItem')

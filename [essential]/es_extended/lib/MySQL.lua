@@ -27,6 +27,7 @@ function MySQL.executeQuery(self, command, params)
 end
 
 function MySQL.getResults(self, mySqlCommand, fields, byField)
+
 	if type(fields) ~= "table" or #fields == 0 then
 		return nil
 	end

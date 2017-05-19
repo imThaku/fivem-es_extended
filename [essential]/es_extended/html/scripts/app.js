@@ -16,10 +16,10 @@
 		'</div>'
 	;
 
-	let DefaultWithTypeActionAndCountTpl = 
+	let DefaultWithTypeActionCountAndUsableTpl = 
 		'<div class="head">{{title}}</div>' +
 			'<div class="menu-items">' + 
-				'{{#items}}<div class="menu-item" data-value="{{value}}" data-remove-on-select="{{removeOnSelect}}" data-type="{{type}}" data-action="{{action}}" data-count="{{count}}">{{label}}</div>{{/items}}' +
+				'{{#items}}<div class="menu-item" data-value="{{value}}" data-remove-on-select="{{removeOnSelect}}" data-type="{{type}}" data-action="{{action}}" data-count="{{count}}" data-usable="{{usable}}">{{label}}</div>{{/items}}' +
 			'</div>'+
 		'</div>'
 	;
@@ -31,7 +31,7 @@
 		 	visible   : false,
 		 	current   : -1,
 		 	hasControl: false,
-		 	template  : DefaultWithTypeAndCountTpl,
+		 	template  : DefaultWithTypeActionCountAndUsableTpl,
 
 		  items: []
 		},
@@ -41,7 +41,7 @@
 		 	visible   : false,
 		 	current   : -1,
 		 	hasControl: false,
-		 	template  : DefaultWithTypeActionAndCountTpl,
+		 	template  : DefaultWithTypeActionCountAndUsableTpl,
 
 		  items: []
 		}
@@ -83,6 +83,7 @@
 			currentType                = $('#menu_' + currentMenu + ' .menu-item:eq(0)').data('type');
 			currentAction              = $('#menu_' + currentMenu + ' .menu-item:eq(0)').data('action');
 			currentCount               = $('#menu_' + currentMenu + ' .menu-item:eq(0)').data('count');
+			currentUsable              = $('#menu_' + currentMenu + ' .menu-item:eq(0)').data('usable');
 		}
 
 		$('#ctl_return').show();
@@ -196,6 +197,7 @@
 	let currentType          = null;
 	let currentAction        = null;
 	let currentCount         = null;
+	let currentUsable        = null;
 	let currentInventoryItem = null;
 	let accountDivs          = {}
 	
@@ -259,6 +261,7 @@
 			currentType   = $('#menu_' + currentMenu + ' .menu-item:eq(' + menus[currentMenu].current + ')').data('type');
 			currentAction = $('#menu_' + currentMenu + ' .menu-item:eq(' + menus[currentMenu].current + ')').data('action');
 			currentCount  = $('#menu_' + currentMenu + ' .menu-item:eq(' + menus[currentMenu].current + ')').data('count');
+			currentUsable = $('#menu_' + currentMenu + ' .menu-item:eq(' + menus[currentMenu].current + ')').data('usable');
 		}
 
 		if(data.enterPressed){
@@ -280,7 +283,8 @@
 						val   : currentVal,
 						type  : currentType,
 						action: currentAction,
-						count : currentCount
+						count : currentCount,
+						usable: currentUsable
 					}))
 				}
 
@@ -300,6 +304,7 @@
 					currentType   = $('#menu_' + currentMenu + ' .menu-item:eq(0)').data('type');
 					currentAction = $('#menu_' + currentMenu + ' .menu-item:eq(0)').data('action');
 					currentCount  = $('#menu_' + currentMenu + ' .menu-item:eq(0)').data('count');
+					currentUsable = $('#menu_' + currentMenu + ' .menu-item:eq(0)').data('usable');
 				}
 
 			} 

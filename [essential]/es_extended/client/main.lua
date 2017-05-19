@@ -42,10 +42,11 @@ function showInventory(inventory)
 	for i=1, #inventory, 1 do
 		if inventory[i].count > 0 then
 			table.insert(items, {
-				label = inventory[i].label .. ' x' .. inventory[i].count,
-				value = inventory[i].item,
-				type  = 'item_standard',
-				count = inventory[i].count,
+				label  = inventory[i].label .. ' x' .. inventory[i].count,
+				value  = inventory[i].item,
+				type   = 'item_standard',
+				count  = inventory[i].count,
+				usable = inventory[i].usable
 			})
 		end
 	end
@@ -235,6 +236,10 @@ RegisterNUICallback('select', function(data, cb)
 				{label = 'Retour', action = 'return'}
 			}
 
+			if data.usable then
+				table.insert(items, {label = 'Utiliser', type = data.type, action = 'use', value = data.val})
+			end
+
 			SendNUIMessage({
 				showMenu = true,
 				menu     = 'inventory_actions',
@@ -264,6 +269,11 @@ RegisterNUICallback('select', function(data, cb)
 
 				SetNuiFocus(true)
 
+			end
+
+			if data.action == 'use' then
+				TriggerServerEvent('esx:useItem', data.val)
+				TriggerServerEvent('esx:requestPlayerDataForGUI')
 			end
 
 		end
