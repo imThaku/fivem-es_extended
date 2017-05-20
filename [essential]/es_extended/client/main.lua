@@ -237,7 +237,7 @@ RegisterNUICallback('select', function(data, cb)
 			}
 
 			if data.usable then
-				table.insert(items, {label = 'Utiliser', type = data.type, action = 'use', value = data.val})
+				table.insert(items, 1, {label = 'Utiliser', type = data.type, action = 'use', value = data.val})
 			end
 
 			SendNUIMessage({
