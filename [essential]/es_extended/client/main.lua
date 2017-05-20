@@ -14,9 +14,11 @@ local PID                       = 0
 local GUI                       = {}
 GUI.InventoryIsShowed           = false
 GUI.RemoveInventoryItemIsShowed = false
+GUI.GiveInventoryItemIsShowed   = false
 GUI.Time                        = 0
 local HasLoadedLoadout          = false
 local TimeoutCallbacks          = {}
+local CurrentItemToGive         = nil
 
 function _SetTimeout(msec, cb)
 	table.insert(TimeoutCallbacks, {
@@ -35,9 +37,53 @@ function Notification(message)
 	DrawNotification(0,1)
 end
 
-function showInventory(inventory)
+function GetClosestPlayerInArea(positions, radius)
+
+	local playerPed             = GetPlayerPed(-1)
+	local playerServerId        = GetPlayerServerId(PlayerId())
+	local playerCoords          = GetEntityCoords(playerPed)
+	local closestPlayer         = -1
+	local closestDistance       = math.huge
+
+	for k, v in pairs(positions) do
+
+   if tonumber(k) ~= playerServerId then
+      
+      local otherPlayerCoords = positions[k]
+      local distance          = GetDistanceBetweenCoords(playerCoords.x, playerCoords.y, playerCoords.z, otherPlayerCoords.x, otherPlayerCoords.y, otherPlayerCoords.z, true)
+
+      if distance <= radius and distance < closestDistance then
+      	closestPlayer   = tonumber(k)
+      	closestDistance = distance
+      end
+   	end
+  end
+
+  return closestPlayer
+
+end
+
+function showInventory(inventory, money, accounts)
 
 	local items = {}
+
+	table.insert(items, {
+		label  = 'Cash',
+		value  = 'money',
+		type   = 'item_money',
+		count  = money,
+		usable = false
+	})
+
+	for i=1, #accounts, 1 do
+		table.insert(items, {
+			label  = Config.accountLabels[i],
+			value  = accounts[i].name,
+			type   = 'item_account',
+			count  = accounts[i].money,
+			usable = false
+		})
+	end
 
 	for i=1, #inventory, 1 do
 		if inventory[i].count > 0 then
@@ -128,23 +174,11 @@ end)
 
 RegisterNetEvent('esx:responsePlayerDataForGUI')
 AddEventHandler('esx:responsePlayerDataForGUI', function(data)
-
-	showInventory(data.inventory)
-
-	SendNUIMessage({
-		showMenu = true,
-		menu     = 'inventory',
-		items    = items
-	})
-
-	SendNUIMessage({
-		showControls = false
-	})
-
+	showInventory(data.inventory, data.money, data.accounts)
 end)
 
 RegisterNetEvent('esx:addInventoryItem')
-AddEventHandler('esx:addInventoryItem', function(inventory, item, count)
+AddEventHandler('esx:addInventoryItem', function(inventory, money, accounts, item, count)
 	
 	SendNUIMessage({
 		addInventoryItem = true,
@@ -153,13 +187,13 @@ AddEventHandler('esx:addInventoryItem', function(inventory, item, count)
 	})
 
 	if GUI.InventoryIsShowed then
-		showInventory(inventory)
+		showInventory(inventory, money, accounts)
 	end
 
 end)
 
 RegisterNetEvent('esx:removeInventoryItem')
-AddEventHandler('esx:removeInventoryItem', function(inventory, item, count)
+AddEventHandler('esx:removeInventoryItem', function(inventory, money, accounts, item, count)
 	
 	SendNUIMessage({
 		removeInventoryItem = true,
@@ -168,7 +202,7 @@ AddEventHandler('esx:removeInventoryItem', function(inventory, item, count)
 	})
 
 	if GUI.InventoryIsShowed then
-		showInventory(inventory)
+		showInventory(inventory, money, accounts)
 	end
 
 end)
@@ -227,12 +261,40 @@ AddEventHandler('esx:responseLastPosition', function(pos)
 
 end)
 
+RegisterNetEvent('esx:responsePlayerPositions')
+AddEventHandler('esx:responsePlayerPositions', function(positions, reason)
+
+	if reason == 'give_item' then
+
+		local closestPlayer = GetClosestPlayerInArea(positions, 3.0)
+
+    if closestPlayer ~= -1 then
+
+    	if CurrentItemToGive.type == 'item_standard' then
+    		TriggerServerEvent('esx:giveItem', closestPlayer, CurrentItemToGive.item, CurrentItemToGive.count)
+    	elseif CurrentItemToGive.type == 'item_money' then
+    		TriggerServerEvent('esx:giveCash', closestPlayer, CurrentItemToGive.count)
+    	elseif CurrentItemToGive.type == 'item_account' then
+				TriggerServerEvent('esx:giveAccountMoney', closestPlayer, CurrentItemToGive.item, CurrentItemToGive.count)
+    	end
+
+    else
+    	TriggerEvent('esx:showNotification', 'Aucun joueur à proximité')
+		end
+
+		TriggerServerEvent('esx:requestPlayerDataForGUI')
+
+	end
+
+end)
+
 RegisterNUICallback('select', function(data, cb)
 
 		if data.menu == 'inventory' then
 
 			local items = {
-				{label = 'Jeter', type = data.type, action = 'remove', value = data.val},
+				{label = 'Donner', type = data.type, action = 'give',   value = data.val},
+				{label = 'Jeter',  type = data.type, action = 'remove', value = data.val},
 				{label = 'Retour', action = 'return'}
 			}
 
@@ -254,6 +316,25 @@ RegisterNUICallback('select', function(data, cb)
 
 		if data.menu == 'inventory_actions' then
 
+			if data.action == 'use' then
+				TriggerServerEvent('esx:useItem', data.val)
+				TriggerServerEvent('esx:requestPlayerDataForGUI')
+			end
+
+			if data.action == 'give' then
+
+				SendNUIMessage({
+					showGiveInventoryItem = true,
+					type                  = data.type,
+					item                  = data.val
+				})
+
+				GUI.GiveInventoryItemIsShowed = true
+
+				SetNuiFocus(true)
+
+			end
+
 			if data.action == 'return' then
   			TriggerServerEvent('esx:requestPlayerDataForGUI')
 			end
@@ -262,6 +343,7 @@ RegisterNUICallback('select', function(data, cb)
   			
 				SendNUIMessage({
 					showRemoveInventoryItem = true,
+					type                    = data.type,
 					item                    = data.val
 				})
 
@@ -271,26 +353,29 @@ RegisterNUICallback('select', function(data, cb)
 
 			end
 
-			if data.action == 'use' then
-				TriggerServerEvent('esx:useItem', data.val)
-				TriggerServerEvent('esx:requestPlayerDataForGUI')
-			end
-
 		end
 
 		cb('ok')
 
 end)
 
-
 RegisterNUICallback('remove_inventory_item', function(data, cb)
 
+	local type  = data.type
 	local count = tonumber(data.count)
 
 	if count == nil then
 		TriggerEvent('esx:showNotification', 'Quantité invalide')
 	else
-		TriggerServerEvent('esx:removeInventoryItem', data.item, data.count)
+
+		if type == 'item_standard' then
+			TriggerServerEvent('esx:removeInventoryItem', data.item, data.count)
+		elseif type == 'item_money' then
+			TriggerServerEvent('esx:removeCash', data.count)
+		elseif type == 'item_account' then
+			TriggerServerEvent('esx:removeAccountMoney', data.item, data.count)
+		end
+
 	end
 
 	SendNUIMessage({
@@ -302,6 +387,32 @@ RegisterNUICallback('remove_inventory_item', function(data, cb)
 	SetNuiFocus(false)
 
 	TriggerServerEvent('esx:requestPlayerDataForGUI')
+	
+	cb('ok')
+
+end)
+
+RegisterNUICallback('give_inventory_item', function(data, cb)
+
+	local type  = data.type
+	local count = tonumber(data.count)
+
+	if count == nil then
+		TriggerEvent('esx:showNotification', 'Quantité invalide')
+	else
+
+		CurrentItemToGive = data
+
+		TriggerServerEvent('esx:requestPlayerPositions', 'give_item')
+	end
+
+	SendNUIMessage({
+		showGiveInventoryItem = false
+	})
+
+	GUI.GiveInventoryItemIsShowed = false
+
+	SetNuiFocus(false)
 	
 	cb('ok')
 
@@ -385,7 +496,7 @@ Citizen.CreateThread(function()
 
   	Wait(0)
 
-    if GUI.RemoveInventoryItemIsShowed then
+    if GUI.RemoveInventoryItemIsShowed or GUI.GiveInventoryItemIsShowed then
 
       DisableControlAction(0, 1,   true) -- LookLeftRight
       DisableControlAction(0, 2,   true) -- LookUpDown

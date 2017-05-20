@@ -3,6 +3,14 @@ MySQL:open("127.0.0.1", "gta5_gamemode_essential", "root", "foo")
 
 local Users                = {}
 local UsableItemsCallbacks = {}
+local Items                = {}
+
+local executed_query = MySQL:executeQuery("SELECT * FROM items")
+local result         = MySQL:getResults(executed_query, {'name', 'label'})
+
+for i=1, #result, 1 do
+	Items[result[i].name] = result[i].label
+end
 
 RegisterServerEvent('esx:clientLog')
 AddEventHandler('esx:clientLog', function(str)
@@ -309,6 +317,183 @@ AddEventHandler('esx:removeInventoryItem', function(item, count)
 
 end)
 
+RegisterServerEvent('esx:removeCash')
+AddEventHandler('esx:removeCash', function(amount)
+	
+	local _source = source
+
+	TriggerEvent('esx:getPlayerFromId', _source, function(xPlayer)
+
+		if xPlayer.player.money >= amount then
+
+			TriggerClientEvent('esx:showNotification', _source, 'Suppression dans 5 minutes')
+
+			SetTimeout(Config.RemoveInventoryItemDelay, function()
+				
+				local remainingCount = xPlayer.player.money
+				local total          = amount
+
+				if remainingCount < amount then
+					total = remainingCount
+				end
+				
+				if total > 0 then
+					xPlayer:removeMoney(total)
+					TriggerClientEvent('esx:showNotification', _source, 'Vous avez jeté $' .. total)
+				end
+
+			end)
+
+		else
+			TriggerClientEvent('esx:showNotification',  _source, 'Montant invalide')
+		end
+
+	end)
+
+end)
+
+RegisterServerEvent('esx:removeAccountMoney')
+AddEventHandler('esx:removeAccountMoney', function(accountName, amount)
+	
+	local _source = source
+
+	TriggerEvent('esx:getPlayerFromId', _source, function(xPlayer)
+
+		local account = xPlayer:getAccount(accountName)
+
+		if account.money >= amount then
+
+			TriggerClientEvent('esx:showNotification', _source, 'Suppression dans 5 minutes')
+
+			SetTimeout(Config.RemoveInventoryItemDelay, function()
+				
+				local remainingCount = account.money
+				local total          = amount
+
+				if remainingCount < amount then
+					total = remainingCount
+				end
+				
+				if total > 0 then
+					xPlayer:removeAccountMoney(accountName, total)
+					TriggerClientEvent('esx:showNotification', _source, 'Vous avez jeté $' .. total)
+				end
+
+			end)
+
+		else
+			TriggerClientEvent('esx:showNotification', _source, 'Montant invalide')
+		end
+		
+	end)
+
+end)
+
+RegisterServerEvent('esx:giveItem')
+AddEventHandler('esx:giveItem', function(playerId, itemName, count)
+	
+	local _source = source
+
+	TriggerEvent('esx:getPlayerFromId', _source, function(xPlayer)
+
+		local item = xPlayer:getInventoryItem(itemName)
+
+		if count > 0 and item.count >= count then
+
+			xPlayer:removeInventoryItem(itemName, count)
+
+			TriggerEvent('esx:getPlayerFromId', playerId, function(targetXPlayer)
+				
+				targetXPlayer:addInventoryItem(itemName, count)
+
+				TriggerClientEvent('esx:showNotification', _source, 'Vous avez donné x' .. count .. ' ' .. Items[itemName])
+				TriggerClientEvent('esx:showNotification', playerId, 'Vous avez reçu x' .. count .. ' ' .. Items[itemName])
+			end)
+		else
+			TriggerClientEvent('esx:showNotification', _source, 'Quantité invalide')
+		end
+
+	end)
+
+end)
+
+RegisterServerEvent('esx:giveCash')
+AddEventHandler('esx:giveCash', function(playerId, amount)
+	
+	local _source = source
+
+	TriggerEvent('esx:getPlayerFromId', _source, function(xPlayer)
+
+		local money = xPlayer.player.money
+
+		if amount > 0 and money >= amount then
+
+			xPlayer:removeMoney(amount)
+
+			TriggerEvent('esx:getPlayerFromId', playerId, function(targetXPlayer)
+				
+				targetXPlayer:addMoney(amount)
+				
+				TriggerClientEvent('esx:showNotification', _source, 'Vous avez envoyé $' .. amount)
+				TriggerClientEvent('esx:showNotification', playerId, 'Vous avez reçu $' .. amount)
+			end)
+			
+		else
+			TriggerClientEvent('esx:showNotification', _source, 'Montant invalide')
+		end
+
+	end)
+
+end)
+
+RegisterServerEvent('esx:giveAccountMoney')
+AddEventHandler('esx:giveAccountMoney', function(playerId, accountName, amount)
+	
+	local _source = source
+
+	TriggerEvent('esx:getPlayerFromId', _source, function(xPlayer)
+
+		local account = xPlayer:getAccount(accountName)
+
+		if amount > 0 and account.money >= amount then
+
+			xPlayer:removeAccountMoney(accountName, amount)
+
+			TriggerEvent('esx:getPlayerFromId', playerId, function(targetXPlayer)
+				
+				targetXPlayer:addAccountMoney(accountName, amount)
+				
+				TriggerClientEvent('esx:showNotification', _source, 'Vous avez envoyé $' .. amount)
+				TriggerClientEvent('esx:showNotification', playerId, 'Vous avez reçu $' .. amount)
+			end)
+			
+		else
+			TriggerClientEvent('esx:showNotification', _source, 'Montant invalide')
+		end
+
+	end)
+
+end)
+
+RegisterServerEvent('esx:requestPlayerPositions')
+AddEventHandler('esx:requestPlayerPositions', function(reason)
+	
+	local _source = source
+
+	TriggerEvent('esx:getPlayers', function(xPlayers)
+
+		local positions = {}
+
+		for k, v in pairs(xPlayers) do
+			positions[tostring(k)] = v.player.coords
+		end
+
+		TriggerClientEvent('esx:responsePlayerPositions', _source, positions, reason)
+
+	end)
+
+end)
+
 TriggerEvent("es:addGroup", "jobmaster", "user", function(group) end)
 
 TriggerEvent('es:addGroupCommand', 'tp', 'admin', function(source, args, user)
@@ -439,7 +624,7 @@ local function paycheck()
 
 			for k,v in pairs(players) do
 				v:addMoney(v.job.grade_salary)
-				TriggerClientEvent('esx:showNotification', v.player.source, 'Vous avez recu votre salaire : ' .. '$' .. v.job.grade_salary)
+				TriggerClientEvent('esx:showNotification', v.player.source, 'Vous avez reçu votre salaire : ' .. '$' .. v.job.grade_salary)
 			end
 
 		end)

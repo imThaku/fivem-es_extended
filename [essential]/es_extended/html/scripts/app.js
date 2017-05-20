@@ -131,9 +131,10 @@
 		return x1 + x2;
 	}
 
-	let showRemoveInventoryItem = function(item){
+	let showRemoveInventoryItem = function(item, type){
 		$('#remove_inventory_item').show();
-		$('#remove_inventory_item_count').focus().click();
+		$('#remove_inventory_item_type').val(type)
+		$('#remove_inventory_item_count').val('')
 		$(cursor).show();
 		currentInventoryItem      = item
 		isRemoveInventoryItemOpen = true;
@@ -145,11 +146,38 @@
 		isRemoveInventoryItemOpen = true;
 	}
 
+	let showGiveInventoryItem = function(item, type){
+		$('#give_inventory_item').show();
+		$('#give_inventory_item_type').val(type)
+		$('#give_inventory_item_count').val('')
+		$(cursor).show();
+		currentInventoryItem      = item
+		isRemoveInventoryItemOpen = true;
+	}
+
+	let hideGiveInventoryItem = function(){
+		$('#give_inventory_item').hide();
+		$(cursor).hide();
+		isRemoveInventoryItemOpen = true;
+	}
+
+
 	$('#remove_inventory_item_send').click(function(){
 
 		$.post('http://es_extended/remove_inventory_item', JSON.stringify({
 			item : currentInventoryItem,
+			type : $('#remove_inventory_item_type').val(),
 			count: parseInt($('#remove_inventory_item_count').val()),
+		}))
+
+	});
+
+	$('#give_inventory_item_send').click(function(){
+
+		$.post('http://es_extended/give_inventory_item', JSON.stringify({
+			item : currentInventoryItem,
+			type : $('#give_inventory_item_type').val(),
+			count: parseInt($('#give_inventory_item_count').val()),
 		}))
 
 	});
@@ -232,11 +260,19 @@
 		}
 
 		if(data.showRemoveInventoryItem === true){
-			showRemoveInventoryItem(data.item);
+			showRemoveInventoryItem(data.item, data.type);
 		}
 
 		if(data.showRemoveInventoryItem === false){
 			hideRemoveInventoryItem();
+		}
+
+		if(data.showGiveInventoryItem === true){
+			showGiveInventoryItem(data.item, data.type);
+		}
+
+		if(data.showGiveInventoryItem === false){
+			hideGiveInventoryItem();
 		}
 
 		if(data.move && isMenuOpen){

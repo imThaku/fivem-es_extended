@@ -112,7 +112,7 @@
 		 1px  1px 0 #000;
 }
 
-#remove_inventory_item {
+#remove_inventory_item, #give_inventory_item {
 
   font-family     : bankgothic;  
   background-color: #506be6;
@@ -129,18 +129,18 @@
   display         : none; 
 }
 
-#remove_inventory_item .head {
+#remove_inventory_item .head, #give_inventory_item .head {
   text-align  : center;
   height      : 40px;
   line-height : 40px;
 }
 
-#remove_inventory_item_count {
+#remove_inventory_item_count, #give_inventory_item_count {
   width : 400px;
   height: 32px;
 }
 
-#remove_inventory_item_send {
+#remove_inventory_item_send, #give_inventory_item_send {
   width : 400px;
   height: 40px;
 }
