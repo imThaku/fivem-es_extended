@@ -165,16 +165,20 @@ end)
 
 AddEventHandler('playerDropped', function()
 
-	if Users[source] ~= nil then
-		
+	local _source = source
+
+	if Users[_source] ~= nil then
+
+		TriggerEvent('esx:playerDropped',  _source)
+
 		local query = ''
 
 		-- User accounts
 		local itemCount = 0
 		local subQuery  = '';
 
-		for i=1, #Users[source].accounts, 1 do
-			subQuery = subQuery .. "UPDATE user_accounts SET `money`='" .. Users[source].accounts[i].money .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND name = '" .. Users[source].accounts[i].name .. "';"
+		for i=1, #Users[_source].accounts, 1 do
+			subQuery = subQuery .. "UPDATE user_accounts SET `money`='" .. Users[_source].accounts[i].money .. "' WHERE identifier = '" .. Users[_source].identifier .. "' AND name = '" .. Users[_source].accounts[i].name .. "';"
 			itemCount = itemCount + 1
 		end
 
@@ -186,8 +190,8 @@ AddEventHandler('playerDropped', function()
 		local subQuery  = ''
 		local itemCoutn = 0
 
-		for i=1, #Users[source].inventory, 1 do
-			subQuery  = subQuery .. "UPDATE user_inventory SET `count`='" .. Users[source].inventory[i].count .. "' WHERE identifier = '" .. Users[source].identifier .. "' AND item = '" .. Users[source].inventory[i].item .. "';"
+		for i=1, #Users[_source].inventory, 1 do
+			subQuery  = subQuery .. "UPDATE user_inventory SET `count`='" .. Users[_source].inventory[i].count .. "' WHERE identifier = '" .. Users[_source].identifier .. "' AND item = '" .. Users[_source].inventory[i].item .. "';"
 			itemCount = itemCount + 1
 		end
 
@@ -196,9 +200,9 @@ AddEventHandler('playerDropped', function()
 		end
 
 		-- Job, loadout and position
-		query = query .. "UPDATE users SET job = '" .. Users[source].job.name .. "', job_grade = '" .. Users[source].job.grade .. "', loadout = '" .. json.encode(Users[source].loadout) .. "', position='" .. json.encode(Users[source].player.coords) .. "' WHERE identifier = '" .. Users[source].identifier .. "';"
+		query = query .. "UPDATE users SET job = '" .. Users[_source].job.name .. "', job_grade = '" .. Users[_source].job.grade .. "', loadout = '" .. json.encode(Users[_source].loadout) .. "', position='" .. json.encode(Users[_source].player.coords) .. "' WHERE identifier = '" .. Users[_source].identifier .. "';"
 
-		Users[source] = nil
+		Users[_source] = nil
 
 		MySQL:executeQuery(query)
 
