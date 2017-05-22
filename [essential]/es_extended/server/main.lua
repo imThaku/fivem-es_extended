@@ -563,6 +563,7 @@ TriggerEvent('es:addCommand', 'sendmoney', function(source, args, user)
 
 end)
 
+local data = {}
 
 local function saveData()
 	
@@ -573,13 +574,51 @@ local function saveData()
 
 		for k,v in pairs(Users)do
 			
+			local source = v.player.source
+
+			if data[source] == nil then
+				
+				data[source] = {
+					accounts  = {},
+					inventory = {}
+				}
+
+				for i=1, #v.accounts, 1 do
+					table.insert(data[source].accounts, {
+						name  = v.accounts[i].name,
+						money = nil
+					})
+				end
+
+				for i=1, #v.inventory, 1 do
+					table.insert(data[source].inventory, {
+						item  = v.inventory[i].item,
+						count = nil
+					})
+				end
+
+			end
+
 			-- User accounts
 			local subQuery  = ''
 			local itemCount = 0
 
 			for i=1, #v.accounts, 1 do
-				subQuery = subQuery .. "UPDATE user_accounts SET `money`='" .. v.accounts[i].money .. "' WHERE identifier = '" .. v.identifier .. "' AND name = '" .. v.accounts[i].name .. "';"
-				itemCount = itemCount + 1
+
+				if v.accounts[i].money ~= data[source].accounts[i].money then
+					
+					subQuery = subQuery .. "UPDATE user_accounts SET `money`='" .. v.accounts[i].money .. "' WHERE identifier = '" .. v.identifier .. "' AND name = '" .. v.accounts[i].name .. "';"
+					itemCount = itemCount + 1
+
+					for i=1, #v.accounts, 1 do
+						data[source].accounts[i] = {
+							name  = v.accounts[i].name,
+							money = v.accounts[i].money
+						}
+					end
+
+				end
+
 			end
 
 			if itemCount > 0 then
@@ -591,8 +630,21 @@ local function saveData()
 			local itemCount = 0
 
 			for i=1, #v.inventory, 1 do
-				subQuery  = subQuery .. "UPDATE user_inventory SET `count`='" .. v.inventory[i].count .. "' WHERE identifier = '" .. v.identifier .. "' AND item = '" .. v.inventory[i].item .. "';"
-				itemCount = itemCount + 1
+
+				if v.inventory[i].count ~= data[source].inventory[i].count then
+
+					subQuery  = subQuery .. "UPDATE user_inventory SET `count`='" .. v.inventory[i].count .. "' WHERE identifier = '" .. v.identifier .. "' AND item = '" .. v.inventory[i].item .. "';"
+					itemCount = itemCount + 1
+
+					for i=1, #v.inventory, 1 do
+						data[source].inventory[i] = {
+							item  = v.inventory[i].item,
+							count = v.inventory[i].count
+						}
+					end
+
+				end
+
 			end
 
 			if itemCount > 0 then
@@ -615,6 +667,10 @@ local function saveData()
 end
 
 saveData()
+
+AddEventHandler('playerDropped', function()
+	data[source] = nil
+end)
 
 local function paycheck()
 
