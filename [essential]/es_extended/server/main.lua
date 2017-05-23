@@ -508,6 +508,12 @@ end, function(source, args, user)
 	TriggerClientEvent('chatMessage', source, "SYSTEM", {255, 0, 0}, "Insufficient Permissions.")
 end)
 
+TriggerEvent('es:addGroupCommand', 'loadipl', 'admin', function(source, args, user)
+	TriggerClientEvent('esx:loadIPL', -1, args[2])
+end, function(source, args, user)
+	TriggerClientEvent('chatMessage', source, "SYSTEM", {255, 0, 0}, "Insufficient Permissions.")
+end)
+
 TriggerEvent('es:addGroupCommand', 'setjob', 'jobmaster', function(source, args, user)
 	TriggerEvent('esx:getPlayerFromId', tonumber(args[2]), function(xPlayer)
 		xPlayer:setJob(args[3], tonumber(args[4]))

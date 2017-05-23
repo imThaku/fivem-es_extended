@@ -288,6 +288,17 @@ AddEventHandler('esx:responsePlayerPositions', function(positions, reason)
 
 end)
 
+RegisterNetEvent('esx:loadIPL')
+AddEventHandler('esx:loadIPL', function(name)
+
+	Citizen.CreateThread(function()
+	  LoadMpDlcMaps()
+	  EnableMpDlcMaps(true)
+	  RequestIpl(name)
+	end)
+
+end)
+
 RegisterNUICallback('select', function(data, cb)
 
 		if data.menu == 'inventory' then
