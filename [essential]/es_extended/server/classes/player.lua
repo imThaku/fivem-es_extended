@@ -4,7 +4,7 @@ ExtendedPlayer.__index = ExtendedPlayer
 
 -- Meta table for users
 setmetatable(ExtendedPlayer, {
-	__call = function(self, player, accounts, inventory, job, loadout)
+	__call = function(self, player, accounts, inventory, job, loadout, name)
 		
 		local xpl = {}
 
@@ -14,6 +14,7 @@ setmetatable(ExtendedPlayer, {
 		xpl.inventory  = inventory
 		xpl.job        = job
 		xpl.loadout    = loadout
+		xpl.name       = name
 
 		return setmetatable(xpl, ExtendedPlayer)
 	end
@@ -170,7 +171,7 @@ function ExtendedPlayer:addInventoryItem(name, count)
 	local newCount = item.count + count
 	item.count     = newCount
 
-	TriggerClientEvent("esx:addInventoryItem", self.player.source, self.inventory, self.player.money, self.accounts, item, count)
+	TriggerClientEvent("esx:addInventoryItem", self.player.source, self.inventory, item, count)
 
 end
 
@@ -180,7 +181,7 @@ function ExtendedPlayer:removeInventoryItem(name, count)
 	local newCount = item.count - count
 	item.count     = newCount
 
-	TriggerClientEvent("esx:removeInventoryItem", self.player.source, self.inventory, self.player.money, self.accounts, item, count)
+	TriggerClientEvent("esx:removeInventoryItem", self.player.source, self.inventory, item, count)
 
 end
 

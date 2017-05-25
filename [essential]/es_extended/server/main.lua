@@ -1,5 +1,5 @@
 require "resources/[essential]/es_extended/lib/MySQL"
-MySQL:open("127.0.0.1", "gta5_gamemode_essential", "root", "foo")
+MySQL:open("127.0.0.1", "gta5_gamemode_essential", "root", "superballzy")
 
 local Users                = {}
 local UsableItemsCallbacks = {}
@@ -18,8 +18,15 @@ AddEventHandler('esx:clientLog', function(str)
 end)
 
 AddEventHandler('es:newPlayerLoaded', function(source, _user)
+	TriggerClientEvent('esx:requestClientInfos', source)
+end)
+
+RegisterServerEvent('esx:responseClientInfos')
+AddEventHandler('esx:responseClientInfos', function(infos)
 
 	TriggerEvent('es:getPlayerFromId', source, function(user)
+
+		MySQL:executeQuery("UPDATE users SET name = '@name' WHERE identifier = '@identifier'", {['@identifier'] = user.identifier, ['@name'] = infos.playerName})
 
 		local accounts = {}
 
@@ -120,7 +127,7 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 			job['skin_female'] = json.decode(result[1].skin_female)
 		end
 
-		local xPlayer         = ExtendedPlayer(user, accounts, inventory, job, loadout)
+		local xPlayer         = ExtendedPlayer(user, accounts, inventory, job, loadout, infos.playerName)
 		local missingAccounts = xPlayer:getMissingAccounts()
 
 		if #missingAccounts > 0 then
@@ -138,6 +145,7 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 		Users[source] = xPlayer
 
 		TriggerEvent('esx:playerLoaded', source)
+		TriggerClientEvent('esx:playerLoaded', source)
 
 		TriggerClientEvent('es:activateMoney',  source, xPlayer.player.money)
 		TriggerClientEvent('esx:activateMoney', source, xPlayer.accounts)
@@ -145,6 +153,7 @@ AddEventHandler('es:newPlayerLoaded', function(source, _user)
 		TriggerClientEvent('esx:setJob', source, xPlayer.job)
 
 	end)
+
 end)
 
 RegisterServerEvent('esx:getPlayerFromId')
