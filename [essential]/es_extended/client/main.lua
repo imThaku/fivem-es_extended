@@ -130,6 +130,16 @@ AddEventHandler('skinchanger:modelLoaded', function()
 	TriggerServerEvent('esx:requestLoadout')
 end)
 
+RegisterNetEvent('esx:requestClientInfos')
+AddEventHandler('esx:requestClientInfos', function()
+
+	local infos = {
+		playerName = GetPlayerName(PlayerId())
+	}
+
+	TriggerServerEvent('esx:responseClientInfos', infos)
+end)
+
 RegisterNetEvent('esx:activateMoney')
 AddEventHandler('esx:activateMoney', function(a)
 	SendNUIMessage({
