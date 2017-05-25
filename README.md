@@ -24,6 +24,16 @@ Make sure you have essentialmode and es_admin loaded before es_extended
 1) Import es_extended.sql in your database
 2) Copy folders in cfx-server/ressources
 
+Since commit https://github.com/indilo53/fivem-es_extended/commit/12b16323c5ebd4226aa518ac3953b4c94e94e332 you have to add a 'name' column default to '' (empty string)
+
+if you are juste installing es_extended from scratch you can skip this step, it is included in es_extended.sql
+
+```
+ALTER TABLE `users` 
+
+ADD COLUMN `name` VARCHAR(255) NULL DEFAULT '' AFTER `money`;
+```
+
 --- Additionnal notes --
 
 You can add other types of accounts in es_extended/config.lua
