@@ -1,7 +1,8 @@
 USE `gta5_gamemode_essential`;
 
 ALTER TABLE `users` 
-ADD COLUMN `skin` LONGTEXT NULL AFTER `money`,
+ADD COLUMN `name` VARCHAR(255) NULL DEFAULT '' AFTER `money`,
+ADD COLUMN `skin` LONGTEXT NULL AFTER `name`,
 ADD COLUMN `job` varchar(255) NULL DEFAULT 'unemployed' AFTER `skin`,
 ADD COLUMN `job_grade` INT NULL DEFAULT 0 AFTER `job`,
 ADD COLUMN `loadout` LONGTEXT NULL AFTER `job_grade`,
