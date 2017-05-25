@@ -3,7 +3,7 @@ FiveM Essential Extended
 
 -- INFO --
 
-Since commit of 25/05/2017 : https://github.com/indilo53/fivem-es_extended/commit/39e033120c6b9d037b29d66e95697ad9756ee2bf you have to add a 'name' column default to '' (empty string)
+Since commit of 25/05/2017 => https://github.com/indilo53/fivem-es_extended/commit/39e033120c6b9d037b29d66e95697ad9756ee2bf you have to add a 'name' column default to '' (empty string)
 
 if you are juste installing es_extended from scratch you can skip this step, it is included in es_extended.sql
 
