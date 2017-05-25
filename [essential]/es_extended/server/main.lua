@@ -24,7 +24,9 @@ end)
 RegisterServerEvent('esx:responseClientInfos')
 AddEventHandler('esx:responseClientInfos', function(infos)
 
-	TriggerEvent('es:getPlayerFromId', source, function(user)
+	local _source = source
+
+	TriggerEvent('es:getPlayerFromId', _source, function(user)
 
 		MySQL:executeQuery("UPDATE users SET name = '@name' WHERE identifier = '@identifier'", {['@identifier'] = user.identifier, ['@name'] = infos.playerName})
 
@@ -142,15 +144,15 @@ AddEventHandler('esx:responseClientInfos', function(infos)
 			xPlayer:createAccounts(missingAccounts)
 		end
 
-		Users[source] = xPlayer
+		Users[_source] = xPlayer
 
-		TriggerEvent('esx:playerLoaded', source)
-		TriggerClientEvent('esx:playerLoaded', source)
+		TriggerEvent('esx:playerLoaded', _source)
+		TriggerClientEvent('esx:playerLoaded', _source)
 
-		TriggerClientEvent('es:activateMoney',  source, xPlayer.player.money)
-		TriggerClientEvent('esx:activateMoney', source, xPlayer.accounts)
+		TriggerClientEvent('es:activateMoney',  _source, xPlayer.player.money)
+		TriggerClientEvent('esx:activateMoney', _source, xPlayer.accounts)
 		
-		TriggerClientEvent('esx:setJob', source, xPlayer.job)
+		TriggerClientEvent('esx:setJob', _source, xPlayer.job)
 
 	end)
 
