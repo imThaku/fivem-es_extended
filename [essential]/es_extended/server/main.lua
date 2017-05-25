@@ -1,5 +1,5 @@
 require "resources/[essential]/es_extended/lib/MySQL"
-MySQL:open("127.0.0.1", "gta5_gamemode_essential", "root", "superballzy")
+MySQL:open("127.0.0.1", "gta5_gamemode_essential", "root", "foo")
 
 local Users                = {}
 local UsableItemsCallbacks = {}
